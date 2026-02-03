@@ -4,37 +4,30 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE ENGINE", layout="wide", page_icon="◈")
 
-# --- CSS (ULTIMATE RESPONSIVE) ---
+# --- CSS (CLEAN & MOBILE OPTIMIZED) ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
     
-    .header-box { text-align: center; padding: 10px; margin-bottom: 20px; }
-    
-    /* ASCII Banner - Skaliert dynamisch */
-    .ascii-banner { 
-        font-family: 'Courier New', monospace; 
-        white-space: pre; 
-        color: #00ffcc; 
-        font-size: 0.8vw; 
-        line-height: 1.1;
-        display: block;
-        filter: drop-shadow(0 0 5px #00ffcc);
-    }
-
-    .mobile-title {
-        display: none;
-        font-size: 1.8rem;
+    /* Neuer Cleaner Titel */
+    .engine-title {
+        text-align: center;
+        font-size: 2.2rem;
         font-weight: bold;
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px #00ffcc;
+        letter-spacing: 7px;
+        text-shadow: 0 0 15px #00ffcc;
+        color: #00ffcc;
+        margin-bottom: 5px;
+        padding-top: 10px;
     }
     
-    .tagline { color: #444; font-size: 0.7rem; letter-spacing: 5px; margin-top: 5px; }
-
-    @media (max-width: 850px) {
-        .ascii-banner { display: none; }
-        .mobile-title { display: block; }
+    .tagline { 
+        text-align: center;
+        color: #444; 
+        font-size: 0.7rem; 
+        letter-spacing: 5px; 
+        margin-bottom: 30px;
+        text-transform: uppercase;
     }
 
     /* Buttons */
@@ -46,37 +39,32 @@ st.markdown("""
         height: 3.5rem;
         border-radius: 0px !important;
         font-weight: bold;
-        transition: 0.2s;
+        letter-spacing: 2px;
     }
-    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; box-shadow: 0 0 10px #ff0055; }
+    .stButton>button:hover { 
+        border-color: #ff0055 !important; 
+        color: #ff0055 !important; 
+        box-shadow: 0 0 15px #ff0055; 
+    }
 
-    /* Output Styling */
+    /* Output Box */
     .stCodeBlock { border: 1px solid #300 !important; background-color: #050505 !important; }
-    .stCodeBlock code { color: #ff0055 !important; font-size: 1rem !important; }
+    .stCodeBlock code { color: #ff0055 !important; font-size: 1.1rem !important; }
 
-    /* Input & Seed */
+    /* Inputs */
     .stTextArea textarea { background-color: #050505 !important; color: #00ffcc !important; border: 1px solid #111 !important; border-radius: 0px !important; }
     .stTextInput input { background-color: #000 !important; color: #00ffcc !important; border: 1px solid #111 !important; text-align: center; border-radius: 0px !important; }
     
-    .block-container { padding-top: 2rem !important; }
+    /* Mobile Spacing */
+    @media (max-width: 800px) {
+        .engine-title { font-size: 1.6rem; letter-spacing: 3px; }
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-st.markdown("""
-    <div class="header-box">
-        <div class="ascii-banner">
- █████╗  ██████╗ ██╗   ██╗ █████╗ ███████╗██╗███╗   ██╗███████╗
-██╔══██╗██╔═══██╗██║   ██║██╔══██╗██╔════╝██║████╗  ██║██╔════╝
-███████║██║   ██║██║   ██║███████║███████╗██║██╔██╗ ██║█████╗  
-██╔══██║██║▄▄ ██║██║   ██║██╔══██║╚════██║██║██║╚██╗██║██╔══╝  
-██║  ██║╚██████╔╝╚██████╔╝██║  ██║███████║██║██║ ╚████║███████╗
-╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝ ENGINE
-        </div>
-        <div class="mobile-title">◈ AQUASINE ENGINE</div>
-        <p class="tagline">BY VEHMKATER</p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown('<div class="engine-title">◈ AQUASINE ENGINE</div>', unsafe_allow_html=True)
+st.markdown('<p class="tagline">BY VEHMKATER</p>', unsafe_allow_html=True)
 
 # --- ENGINE LOGIC ---
 def glitch_engine(content, seed_val):
@@ -106,7 +94,7 @@ if 's_val' not in st.session_state: st.session_state.s_val = 45739
 if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
 if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
-# --- UI ---
+# --- UI LAYOUT ---
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
@@ -136,7 +124,7 @@ with col2:
     if st.session_state.out_cache:
         st.code(st.session_state.out_cache, language=None)
     else:
-        st.markdown('<div style="border:1px solid #111; padding:40px; color:#222; text-align:center;">AWAITING_UPLINK...</div>', unsafe_allow_html=True)
+        st.markdown('<div style="border:1px solid #111; padding:50px; color:#222; text-align:center;">AWAITING_UPLINK...</div>', unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption(f"AQUASINE ENGINE | AUTH: VEHMKATER | BUILD_20.5")
+st.caption(f"AQUASINE ENGINE | AUTH: VEHMKATER | BUILD_20.5_STABLE")
