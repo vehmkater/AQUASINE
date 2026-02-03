@@ -82,7 +82,7 @@ if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
-st.markdown('<p class="tagline">vehmkater</p>', unsafe_allow_html=True)
+st.markdown('<p class="tagline">by vehmkater</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
