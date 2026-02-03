@@ -4,81 +4,67 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 
-# --- ADVANCED CYBER CSS ---
+# --- CYBER DESIGN CSS ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400&display=swap');
-
-    .stApp { background-color: #000000; color: #00ffcc; font-family: 'JetBrains Mono', monospace; }
+    .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
     
-    /* Header & Tag */
-    .main-title { font-size: 1.8rem; letter-spacing: 5px; font-weight: 100; color: #00ffcc; margin-bottom: 0px; }
-    .vehm-tag { font-size: 0.7rem; color: #222; letter-spacing: 3px; margin-bottom: 30px; }
+    /* Headers */
+    .title { font-size: 2.2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
+    .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
 
-    /* Input & Output Fields */
+    /* Input Fields */
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
         border: 1px solid #111 !important;
+        font-size: 1rem !important;
         border-radius: 0px !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.9rem !important;
     }
     
-    /* Mobile Word-Wrap Fix & Pink Output */
+    /* Output Field (Pink) */
     div[data-testid="column"]:nth-child(2) textarea {
         color: #ff0055 !important;
         white-space: pre-wrap !important;
         word-wrap: break-word !important;
-        border: 1px solid #1a000a !important;
+        border: 1px solid #300 !important;
     }
     
-    /* Minimalist Buttons */
+    /* Cyber Buttons */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
         color: #00ffcc !important; 
-        border: 1px solid #111 !important;
+        border: 1px solid #222 !important;
+        height: 3rem;
         border-radius: 0px !important;
-        height: 3.5rem;
-        letter-spacing: 4px;
-        transition: 0.3s;
+        letter-spacing: 2px;
     }
-    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; background-color: #0a0005 !important; }
+    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
-    /* Seed Input Field */
+    /* Seed Input */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
         border: 1px solid #111 !important;
         text-align: center;
         border-radius: 0px !important;
-        letter-spacing: 2px;
     }
 
-    /* Seed Copy Box */
-    .stCodeBlock { background-color: #050505 !important; border: 1px solid #111 !important; border-radius: 0px !important; }
-    code { color: #00ffcc !important; }
-    
-    /* Hide Streamlit Branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* Seed Copy Block */
+    .stCodeBlock { background-color: #050505 !important; border: 1px solid #111 !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CORE LOGIC ---
 def glitch_process(content, seed_val):
     if not content or content.strip() == "":
-        return "", "IDLE"
+        return "", "..."
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    
-    # Analyze first non-whitespace char for mode detection
     stripped = content.strip()
-    first_char = stripped[0]
-    is_decrypt = GLYPH_BASE <= ord(first_char) < (GLYPH_BASE + RANGE_SIZE + 500)
+    is_decrypt = GLYPH_BASE <= ord(stripped[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
     for i, char in enumerate(content):
@@ -96,52 +82,57 @@ def glitch_process(content, seed_val):
             res += chr(orig_code % 256)
     return res, "DECRYPT" if is_decrypt else "ENCRYPT"
 
-# --- UI STRUCTURE ---
-st.markdown('<p class="main-title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
-st.markdown('<p class="vehm-tag">VEHMKATER_CORE_LINKED</p>', unsafe_allow_html=True)
-
+# --- SESSION INITIALIZATION ---
 if 'seed' not in st.session_state:
     st.session_state.seed = 45739
+if 'output_text' not in st.session_state:
+    st.session_state.output_text = ""
+if 'mode' not in st.session_state:
+    st.session_state.mode = "..."
 
-# --- LAYOUT ---
+# --- UI STRUCTURE ---
+st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
+st.markdown('<p class="tagline">DESIGNED_BY_VEHMKATER</p>', unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### 01_DATA_IN")
-    input_text = st.text_area("In", height=200, label_visibility="collapsed", key="in_field", placeholder="---")
+    st.markdown("### ◈ INPUT")
+    input_text = st.text_area("In", height=200, label_visibility="collapsed", key="main_in", placeholder="---")
     
-    st.markdown("### 02_ENTROPY")
-    # Manual Seed Input
-    seed_input_raw = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
-    
-    # Filter only digits
-    seed_digits = ''.join(filter(str.isdigit, seed_input_raw))
-    current_seed = int(seed_digits) if seed_digits else 0
-    st.session_state.seed = current_seed
+    # Seed Control Row
+    st.markdown("### ◈ SEED")
+    s_col1, s_col2 = st.columns([4, 1])
+    with s_col1:
+        seed_in = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
+        try:
+            current_seed = int(''.join(filter(str.isdigit, seed_in)) or 0)
+            st.session_state.seed = current_seed
+        except: current_seed = st.session_state.seed
+    with s_col2:
+        # Glyphe statt Emoji
+        if st.button("⌬"):
+            st.session_state.seed = random.randint(10000, 99999)
+            st.rerun()
 
-    # Display for copying
-    st.code(f"{current_seed}", language=None)
+    # Seed Copy Display
+    st.code(f"{st.session_state.seed}", language=None)
 
-    # Action Buttons
-    if st.button("RANDOMIZE"):
-        st.session_state.seed = random.randint(10000, 99999)
-        st.rerun()
-        
-    execute_trigger = st.button("EXECUTE")
-
-# Calculation (always runs, but button can be used for force-refresh)
-output_text, mode = glitch_process(input_text, current_seed)
+    # Execution Trigger
+    if st.button("◈ EXECUTE ◈"):
+        out, m = glitch_process(input_text, st.session_state.seed)
+        st.session_state.output_text = out
+        st.session_state.mode = m
 
 with col2:
-    st.markdown(f"### 03_DATA_OUT [{mode}]")
-    # THE FIX: We use a key that doesn't conflict and ensure the value is explicitly passed
+    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode}]")
     st.text_area(
         "Out", 
-        value=output_text, 
+        value=st.session_state.output_text, 
         height=380, 
         label_visibility="collapsed", 
-        key="out_field"
+        key="main_out"
     )
 
 st.markdown("---")
-st.caption(f"NODE_STATUS: ONLINE | STABILITY: 100% | CORE: {current_seed}")
+st.caption(f"NODE: OPERATIONAL | BY: VEHMKATER | ID: {st.session_state.seed}")
