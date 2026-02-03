@@ -30,7 +30,6 @@ st.markdown("""
         border: 1px solid #111 !important;
         height: 4rem;
         border-radius: 0px !important;
-        font-weight: bold;
         letter-spacing: 2px;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
@@ -47,13 +46,13 @@ st.markdown("""
 
 # --- ENGINE ---
 def glitch_engine(content, seed_val):
-    if not content: return "", "IDLE"
+    if not content or content.strip() == "": return "EMPTY_DATA_STREAM", "..."
+    
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    stripped = content.strip()
     
-    # Auto-Detection
-    is_decrypt = any(GLYPH_BASE <= ord(c) < (GLYPH_BASE + RANGE_SIZE + 500) for c in stripped[:5])
+    # Auto-Erkennung (Glyphen-Check)
+    is_decrypt = any(GLYPH_BASE <= ord(c) < (GLYPH_BASE + RANGE_SIZE + 800) for c in content[:10])
     
     res = ""
     for i, char in enumerate(content):
@@ -62,6 +61,7 @@ def glitch_engine(content, seed_val):
             continue
         char_rng = random.Random(seed_val + i)
         shift = char_rng.randint(1, 1000)
+        
         if not is_decrypt:
             new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
@@ -69,12 +69,12 @@ def glitch_engine(content, seed_val):
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
-    return res, "DECRYPT" if is_decrypt else "ENCRYPT"
+    return res, ("DECRYPT" if is_decrypt else "ENCRYPT")
 
-# --- STATE ---
-if 's_val' not in st.session_state: st.session_state.s_val = 45739
-if 'out_data' not in st.session_state: st.session_state.out_data = ""
-if 'mode_tag' not in st.session_state: st.session_state.mode_tag = "..."
+# --- INITIAL STATE ---
+if 'seed' not in st.session_state: st.session_state.seed = 45739
+if 'out_text' not in st.session_state: st.session_state.out_text = ""
+if 'current_mode' not in st.session_state: st.session_state.current_mode = "..."
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -84,41 +84,42 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    # Festes Key-Binding für den Text-Snapshot
-    st.text_area("IN", height=200, label_visibility="collapsed", key="main_input_buffer")
+    # Wir speichern den Input SOFORT bei jeder Änderung im Session State
+    in_text = st.text_area("IN", height=200, label_visibility="collapsed", key="active_input")
     
     st.markdown("### ◈ SEED")
-    # Manuelle Seed-Eingabe
-    s_raw = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
-    try: 
-        st.session_state.s_val = int(''.join(filter(str.isdigit, s_raw)) or 45739)
-    except: pass
+    s_raw = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
+    if s_raw:
+        try: st.session_state.seed = int(''.join(filter(str.isdigit, s_raw)))
+        except: pass
 
-    # Seed Copy Fenster (direkt unter dem Input)
-    st.code(f"{st.session_state.s_val}", language=None)
+    st.code(f"{st.session_state.seed}", language=None)
 
-    # Random Button (⌬)
     if st.button("⌬ RANDOMIZE"):
-        st.session_state.s_val = random.randint(10000, 99999)
+        st.session_state.seed = random.randint(10000, 99999)
         st.rerun()
 
     # EXECUTE Button
     if st.button("◈ EXECUTE ◈"):
-        # Daten direkt aus dem Key-Buffer ziehen
-        txt = st.session_state.main_input_buffer
-        res, m = glitch_engine(txt, st.session_state.s_val)
-        st.session_state.out_data = res
-        st.session_state.mode_tag = m
+        # Wir holen die Daten direkt aus dem "active_input" State
+        data_to_process = st.session_state.active_input
+        result, mode = glitch_engine(data_to_process, st.session_state.seed)
+        st.session_state.out_text = result
+        st.session_state.current_mode = mode
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_tag}]")
+    st.markdown(f"### ◈ OUTPUT [{st.session_state.current_mode}]")
+    # Falls das Textfeld leer bleibt, ist hier das Ergebnis direkt im Code-Block (Backup)
     st.text_area(
         "OUT", 
-        value=st.session_state.out_data, 
-        height=475, 
-        label_visibility="collapsed",
-        key="display_output"
+        value=st.session_state.out_text, 
+        height=400, 
+        label_visibility="collapsed"
     )
+    
+    if st.session_state.out_text:
+        st.caption("RAW_BUFFER_LOG:")
+        st.code(st.session_state.out_text, language=None)
 
 st.markdown("---")
 st.caption(f"STATUS: ONLINE | DESIGN: vehmkater")
