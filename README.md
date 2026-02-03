@@ -43,7 +43,7 @@ Since the shift is purely mathematical, it is 100% reversible. As long as the **
 ### 4. TRANSFORMATION EXAMPLE
 **Input:** `preview text`  
 **Seed:** `73966`  
-**Output:** `⮮⬡⪣⯁⨄⮤⫒ ⭌⪏⯻⨺`
+**Output:** `⊮∡⊣⋁∄⊤⋒ ≌⊏⋻∺`
 
 ---
 
