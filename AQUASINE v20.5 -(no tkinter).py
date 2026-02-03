@@ -4,7 +4,7 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 
-# --- CSS FOR UI ---
+# --- ADVANCED CSS FOR WORD-WRAP & UI ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
@@ -12,23 +12,24 @@ st.markdown("""
     h1 { margin-bottom: 0px !important; }
     .by-line { font-family: 'Courier', monospace; color: #333; margin-bottom: 25px; font-size: 0.85rem; letter-spacing: 1px; }
     
+    /* FORCE WORD WRAP for st.code */
+    div[data-testid="stCodeBlock"] pre {
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    .stCodeBlock { 
+        border: 1px solid #ff0055 !important; 
+        background-color: #050505 !important;
+    }
+    
     /* Text Areas */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
         font-family: 'Courier New', monospace !important; 
         border: 1px solid #111 !important;
-    }
-    
-    /* Glitch-Red Code Block (Output) */
-    .stCodeBlock { 
-        border: 1px solid #ff0055 !important; 
-        background-color: #050505 !important;
-    }
-    .stCodeBlock code {
-        color: #ff0055 !important;
-        white-space: pre-wrap !important;
-        word-wrap: break-word !important;
     }
     
     /* Buttons */
@@ -43,7 +44,7 @@ st.markdown("""
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
     
-    /* Seed Input */
+    /* Seed Input as a copiable terminal field */
     .stTextInput input {
         background-color: #000 !important;
         color: #ff0055 !important;
@@ -88,7 +89,6 @@ def glitch_process(content, seed_val):
 st.title("◈ AQUASINE v20.5")
 st.markdown('<div class="by-line">DESIGNED_BY_VEHMKATER</div>', unsafe_allow_html=True)
 
-# Initialize Session State
 if 'active_seed' not in st.session_state:
     st.session_state.active_seed = 45739
 
@@ -102,30 +102,31 @@ with col1:
     c1, c2, c3 = st.columns([2, 1, 2])
     
     with c1:
-        run_process = st.button("◈ RUN PROCESS ◈")
+        st.button("◈ RUN PROCESS ◈") # Trigger rerun
     
     with c2:
-        # Hier wird der Seed angezeigt und kann geändert werden
-        new_seed_str = st.text_input("S", value=str(st.session_state.active_seed), label_visibility="collapsed")
-        # Update den State nur, wenn die Eingabe eine Zahl ist
-        if new_seed_str.isdigit():
-            st.session_state.active_seed = int(new_seed_str)
+        # Seed als Text-Input (kopierbar)
+        seed_str = st.text_input("S", value=str(st.session_state.active_seed), label_visibility="collapsed", key="seed_field")
+        if seed_str.isdigit():
+            st.session_state.active_seed = int(seed_str)
             
     with c3:
         if st.button("◈ RANDOMIZE SEED ◈"):
             st.session_state.active_seed = random.randint(10000, 99999)
             st.rerun()
 
-# Die Berechnung nutzt jetzt den stabilen active_seed
 output_text, mode = glitch_process(user_input, st.session_state.active_seed)
 
 with col2:
     st.markdown(f"### [ OUTPUT : {mode} ]")
     if output_text:
-        # st.code hat das Kopier-Icon oben rechts integriert
+        # Zeilenumbruch-Fix durch CSS oben (white-space: pre-wrap)
         st.code(output_text, language=None)
     else:
         st.info("System operational. Waiting for sequence...")
 
 st.markdown("---")
-st.caption(f"NODE: ONLINE | SEED: {st.session_state.active_seed}")
+# Kleiner Bonus: Den Seed unten im Footer auch kopierbar machen via st.code
+st.markdown("##### ACTIVE_SEED_HEX:")
+st.code(str(st.session_state.active_seed), language=None)
+st.caption(f"NODE: ONLINE | BY: VEHMKATER")
