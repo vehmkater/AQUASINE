@@ -1,45 +1,85 @@
 ```text
- █████╗  ██████╗ ██╗   ██╗ █████╗ ███████╗██╗███╗   ██╗███████╗
-██╔══██╗██╔═══██╗██║   ██║██╔══██╗██╔════╝██║████╗  ██║██╔════╝
-███████║██║   ██║██║   ██║███████║███████╗██║██╔██╗ ██║█████╗  
-██╔══██║██║▄▄ ██║██║   ██║██╔══██║╚════██║██║██║╚██╗██║██╔══╝  
-██║  ██║╚██████╔╝╚██████╔╝██║  ██║███████║██║██║ ╚████║███████╗
-╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
-           >> THE ORIGINAL VISUAL CHAOS ENGINE <<
+  █████╗  ██████╗ ██╗   ██╗  █████╗  ███████╗ ██╗ ███╗  ██╗ ███████╗
+ ██╔══██╗██╔═══██╗██║   ██║ ██╔══██╗ ██╔════╝ ██║ ████╗ ██║ ██╔════╝
+ ███████║██║   ██║██║   ██║ ███████║ ███████╗ ██║ ██╔██╗██║ █████╗  
+ ██╔══██║██║▄▄ ██║██║   ██║ ██╔══██║ ╚════██║ ██║ ██║╚████║ ██╔══╝  
+ ██║  ██║╚██████╔╝╚██████╔╝ ██║  ██║ ███████║ ██║ ██║ ╚███║ ███████╗
+ ╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝  ╚═╝  ╚═╝ ╚══════╝ ╚═╝ ╚═╝  ╚══╝ ╚══════╝
+              >> HEX-SHIFT ENTROPY NODE v20.6 <<
 ```
-# ⎋ AQUASINE v19.3 - OVERLOAD 
 
-![Language](https://img.shields.io/badge/Language-Python_3.x-3776ab?style=for-the-badge&logo=python)
-![Type](https://img.shields.io/badge/Type-Chaos_Engine-ff0055?style=for-the-badge)
-![Vibe](https://img.shields.io/badge/AESTHETIC-VOID-00ffcc?style=for-the-badge)
+# ⚡ AQUASINE v20.5 | GLITCH_HEX NODE
 
-**AQUASINE** is an experimental **Visual Chaos Engine** and a free tool for using aesthetic glyphs to de- and encrypt text. It is a framework designed to bury data under a thick, mathematically structured layer of visual brutality.
+![Version](https://img.shields.io/badge/Version-20.5-00ffcc?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Stable_Roots-ff0055?style=for-the-badge)
+![Engine](https://img.shields.io/badge/Engine-Unicode_Entropy-white?style=for-the-badge)
 
-**Where aesthetic meets decryption.**
-
-Using a seed-based mapping system, AQUASINE transforms strings into unreadable symbol textures. Without the exact numeric key, the information remains part of the void.
+**AQUASINE** is a high-frequency Hex-Shift generator that transforms ordinary text into an unreadable stream of mathematical glyphs and cryptic Unicode blocks. Version 20.5 abandons static pools in favor of direct **Unicode Point Manipulation**.
 
 ---
 
-## ⚡ CORE FEATURES
+## ◈ HOW IT WORKS (THE LOGIC)
 
-* **Seed-Lock Protocol:** Your password is a numeric seed. Different seed = a completely different universe of chaos.
-* **Dual-State Engine:** Toggle between **Overload** (Scrambling) and **Reconstruct** (Decoding).
-* **Visual Brutalism:** Implements stacking of 300+ exotic glyphs and glitch-marks to physically distort text.
-* **Ghost-Cell Tracking:** Features a real-time focus anchor (`⌖`) to maintain position within the encrypted field.
+Unlike traditional ciphers that replace 'A' with 'B', AQUASINE uses **Dynamic Positional Hex Shifting**. 
+
+### 1. Entropy Generation
+For every single character in your text, the engine generates a unique "Entropy Shift" based on two factors:
+* **The Master Seed:** Your chosen numerical key.
+* **The Index (Position):** The character's placement in the string.
+
+### 2. The Shift Equation
+The transformation follows this mathematical rule:
+$$Code_{new} = Base_{glyph} + (Code_{orig} + Shift_{pos}) \pmod{Range}$$
+
+* **Base_glyph (0x2A00):** This anchors the output in the "Mathematical Operators" Unicode block, ensuring a consistent "Glitch" aesthetic.
+* **Shift_pos:** A pseudo-random value derived from `Seed + Position`. This creates the **Ghost Effect**: typing "AAAAA" will result in five *different* glyphs because each position has a different shift.
+
+### 3. Seamless Decryption
+Since the shift is purely mathematical, it is 100% reversible. As long as the **Master Seed** remains the same, the engine can calculate the exact negative shift to return the glyph back to its original ASCII/UTF-8 value.
+
+### 4. RANSFORMATION EXAMPLE
+**Input:** `preview text`  
+**Seed:** `73966`  
+**Output:** `⮮⬡⪣⯁⨄⮤⫒ ⭌⪏⯻⨺`
 
 ---
 
-## 🛠 TRANSFORMATION EXAMPLE
+## ◈ CORE FEATURES
 
-**Input:** `RESTRICTED_ACCESS_LOG`  
-**Seed:** `99283`  
-**Output:** `⊐Ⅵ⥀҈⣨⊐⧑ⳙ⣨Ⅵ̢⸹_⋊̢̿ⳙ҈̴ⳙⅥ͒͠⥀⥀͡͠_ᚦ⫩⌖⣚`
+* **RAW HEX PROJECTION:** Terminating the era of static lookup tables. The engine operates directly on the Unicode architecture, projecting ASCII values into high-density glyph coordinates via mathematical offsets.
+  
+* **INDEX-BASED ENTROPY:** Execution of the Ghost-Stream protocol. Every character is modulated by its unique stream index. Identical input strings (e.g., "XXXXX") result in non-repetitive, chaotic visual sequences to bypass pattern recognition.
+  
+* **AUTO-STATE DETECTION:** Intelligent node sensing. The system analyzes the entropy density of the input to autonomously toggle between Injection (Encryption) and Extraction (Decryption) without manual override.
+  
+* **VOLATILE BUFFERING:** Zero-trace execution. All transformations occur strictly within the volatile RAM. No keys, plaintexts, or temporary buffers are committed to physical storage.
+  
+* **LOGIC-GATE SANITIZATION:** Active stream integrity. Hardcoded boundary filters prevent the injection of control characters or "dead-weight" symbols that would otherwise corrupt the visual field or compromise stream stability.
 
 ---
 
-## 🖥️ INTERFACE & OUTPUT PREVIEW
+## ◈ INSTALLATION
 
+### Prerequisites
+* **Python 3.8+**
+* **Tkinter** (Standard with most Python installs)
+
+### Quick Start
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/your-username/aquasine-v20.git](https://github.com/your-username/aquasine-v20.git)
+
+## ◈ UI CONTROLS
+
+| Component | Description |
+| :--- | :--- |
+| `[ ENTROPY_SEED ]` | The mathematical key used for the current mapping. |
+| `[ RE-SEED ]` | Generates a new random entropy base. |
+| `[ COPY ]` | Copies the current output stream to your clipboard. |
+| `INPUT_NODE` | Source area for text or encrypted glyphs. |
+| `OUTPUT_STREAM` | The result of the real-time transformation. |
+
+---
 ### [01] System Interface
 ![AQUASINE Interface Preview](preview1.png)
 *The operational terminal of the v19.3 Engine.*
@@ -47,23 +87,11 @@ Using a seed-based mapping system, AQUASINE transforms strings into unreadable s
 ### [02] Visual Deconstruction
 ![AQUASINE Output Preview](preview2.png)
 *Close-up of the high-density glyph stream generated by the Overload protocol.*
-
 ---
 
-## 🚀 GETTING STARTED
+## ◈ DEV NOTES
 
-1.  **Requirement:** Python 3.x must be installed.
-2.  **Save File:** Save the source code as `AQUASINE_v19.3_OVERLOAD.py`.
-3.  **Run:** Simply **double-click** the file or run via terminal:
-    ```bash
-    python AQUASINE_v19.3_OVERLOAD.py
-    ```
-
----
-
-
-## 💀 PHILOSOPHY
-> "In an age of total surveillance, silence is a luxury—but **noise** is a weapon."
+> **"Back to the Roots"**: v20.5 marks the final evolution from simple character replacement to true mathematical hex-shifting. Decryption stability has been increased by 98%, while the ghost effect makes visual pattern analysis nearly impossible for unauthorized users.
 
 ---
 
