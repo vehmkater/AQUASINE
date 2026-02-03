@@ -4,7 +4,7 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 
-# --- ADVANCED CSS FOR WORD-WRAP & UI ---
+# --- CSS FOR UI ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
@@ -12,19 +12,15 @@ st.markdown("""
     h1 { margin-bottom: 0px !important; }
     .by-line { font-family: 'Courier', monospace; color: #333; margin-bottom: 25px; font-size: 0.85rem; letter-spacing: 1px; }
     
-    /* FORCE WORD WRAP for st.code */
+    /* Force Word Wrap for Output */
     div[data-testid="stCodeBlock"] pre {
         white-space: pre-wrap !important;
         word-break: break-all !important;
-        overflow-wrap: break-word !important;
     }
     
-    .stCodeBlock { 
-        border: 1px solid #ff0055 !important; 
-        background-color: #050505 !important;
-    }
+    .stCodeBlock { border: 1px solid #ff0055 !important; background-color: #050505 !important; }
     
-    /* Text Areas */
+    /* Input Areas */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
@@ -32,7 +28,7 @@ st.markdown("""
         border: 1px solid #111 !important;
     }
     
-    /* Buttons */
+    /* Buttons Styling - Einheitlicher Stil */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
@@ -41,10 +37,12 @@ st.markdown("""
         font-family: 'Courier', monospace;
         border-radius: 2px;
         height: 3.5em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
-    
-    /* Seed Input as a copiable terminal field */
+
+    /* Seed Input Field */
     .stTextInput input {
         background-color: #000 !important;
         color: #ff0055 !important;
@@ -99,14 +97,15 @@ with col1:
     st.markdown("### [ INPUT ]")
     user_input = st.text_area("In", height=250, label_visibility="collapsed", key="input_key")
     
+    # Button-Leiste: RUN | SEED INPUT | RANDOMIZE
     c1, c2, c3 = st.columns([2, 1, 2])
     
     with c1:
-        st.button("◈ RUN PROCESS ◈") # Trigger rerun
+        st.button("◈ RUN PROCESS ◈")
     
     with c2:
-        # Seed als Text-Input (kopierbar)
-        seed_str = st.text_input("S", value=str(st.session_state.active_seed), label_visibility="collapsed", key="seed_field")
+        # Hier kann man den Seed ändern
+        seed_str = st.text_input("S", value=str(st.session_state.active_seed), label_visibility="collapsed")
         if seed_str.isdigit():
             st.session_state.active_seed = int(seed_str)
             
@@ -114,19 +113,19 @@ with col1:
         if st.button("◈ RANDOMIZE SEED ◈"):
             st.session_state.active_seed = random.randint(10000, 99999)
             st.rerun()
+    
+    # NEU: Copy-Feld für den Seed direkt unter der Leiste
+    st.markdown("###### COPY_SEED_HEX:")
+    st.code(str(st.session_state.active_seed), language=None)
 
 output_text, mode = glitch_process(user_input, st.session_state.active_seed)
 
 with col2:
     st.markdown(f"### [ OUTPUT : {mode} ]")
     if output_text:
-        # Zeilenumbruch-Fix durch CSS oben (white-space: pre-wrap)
         st.code(output_text, language=None)
     else:
         st.info("System operational. Waiting for sequence...")
 
 st.markdown("---")
-# Kleiner Bonus: Den Seed unten im Footer auch kopierbar machen via st.code
-st.markdown("##### ACTIVE_SEED_HEX:")
-st.code(str(st.session_state.active_seed), language=None)
 st.caption(f"NODE: ONLINE | BY: VEHMKATER")
