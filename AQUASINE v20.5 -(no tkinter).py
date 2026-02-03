@@ -112,7 +112,7 @@ with col1:
             st.session_state.s_val = random.randint(10000, 99999)
             st.rerun()
             
-    st.code(f" {st.session_state.s_val}", language=None)
+    st.code(f"{st.session_state.s_val}", language=None)
 
     if st.button("◈ EXECUTE TRANSMISSION ◈"):
         res, m = glitch_engine(st.session_state.input_buffer, st.session_state.s_val)
