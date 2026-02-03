@@ -40,7 +40,7 @@ $$Code_{new} = Base_{glyph} + (Code_{orig} + Shift_{pos}) \pmod{Range}$$
 ### 3. Seamless Decryption
 Since the shift is purely mathematical, it is 100% reversible. As long as the **Master Seed** remains the same, the engine can calculate the exact negative shift to return the glyph back to its original ASCII/UTF-8 value.
 
-### 4. RANSFORMATION EXAMPLE
+### 4. TRANSFORMATION EXAMPLE
 **Input:** `preview text`  
 **Seed:** `73966`  
 **Output:** `⮮⬡⪣⯁⨄⮤⫒ ⭌⪏⯻⨺`
