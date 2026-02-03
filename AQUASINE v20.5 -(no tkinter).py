@@ -1,26 +1,32 @@
 import streamlit as st
 import random
 
-# Page Config für den "Glitch"-Look
-st.set_page_config(page_title="AQUASINE v20.5", layout="wide")
+# --- CONFIG & STYLING ---
+st.set_page_config(page_title="AQUASINE v20.5 - GLITCH HEX", layout="wide")
 
-# CSS für das Dark-Design (ähnlich wie dein Tkinter-Theme)
+# Custom CSS für den Dark-Cyberpunk Look
 st.markdown("""
     <style>
-    .stApp { background-color: #000000; color: #00ffcc; }
-    textarea { background-color: #0a0a0a !important; color: #00ffcc !important; font-family: 'Courier New', monospace !important; }
-    .stButton>button { background-color: #0a0a0a; color: #00ffcc; border: 1px solid #00ffcc; width: 100%; }
+    .main { background-color: #000000; color: #00ffcc; }
+    .stTextArea textarea { background-color: #050505 !important; color: #00ffcc !important; font-family: 'Courier New', monospace; border: 1px solid #111; }
+    .stTextInput input { background-color: #0a0a0a !important; color: #ff0055 !important; font-family: 'Courier New', monospace; text-align: center; border: 1px solid #333; }
+    .stButton>button { width: 100%; background-color: #0a0a0a; color: #00ffcc; border: 1px solid #00ffcc; border-radius: 0; transition: 0.3s; }
+    .stButton>button:hover { background-color: #00ffcc; color: black; }
+    h1, h2, h3 { color: #00ffcc !important; font-family: 'Courier', monospace; }
+    .status-text { color: #444; font-family: 'Courier', monospace; font-size: 0.8rem; }
     </style>
     """, unsafe_allow_html=True)
 
+# --- LOGIK ---
+GLYPH_BASE = 0x2200
+RANGE_SIZE = 256
+
 def process_logic(content, seed_val):
-    glyph_base = 0x2200 
-    range_size = 256
+    if not content:
+        return ""
     
-    if not content: return ""
-    
-    # Erkennung ob Verschlüsselt oder nicht
-    is_decrypt = glyph_base <= ord(content[0]) < (glyph_base + range_size + 500)
+    # Check ob verschlüsselt oder entschlüsselt werden soll
+    is_decrypt = len(content) > 0 and GLYPH_BASE <= ord(content[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
     for i, char in enumerate(content):
@@ -32,45 +38,57 @@ def process_logic(content, seed_val):
         shift = char_rng.randint(1, 1000)
 
         if not is_decrypt:
-            new_code = glyph_base + (ord(char) + shift) % range_size
+            # ENCRYPT
+            new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
         else:
+            # DECRYPT
             glyph_code = ord(char)
-            orig_code = (glyph_code - glyph_base - shift) % range_size
+            orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
-    return res
-
-# Sidebar UI
-with st.sidebar:
-    st.title("GLITCH_HEX")
-    st.write("[ ENTROPY_SEED ]")
-    seed = st.text_input("Seed", value="55555", label_visibility="collapsed")
-    if st.button("[ RE-SEED ]"):
-        seed = str(random.randint(10000, 99999))
     
-    st.markdown("---")
-    st.caption("◈ NODE_ACTIVE")
+    return res, "DECRYPTING" if is_decrypt else "ENCRYPTING"
 
-# Main UI
-st.title("AQUASINE v20.5 - GLITCH HEX")
+# --- UI LAYOUT ---
+def main():
+    st.title("◈ AQUASINE v20.5 - GLITCH HEX")
+    
+    # Sidebar für Steuerung
+    with st.sidebar:
+        st.markdown("### GLITCH_HEX")
+        
+        if st.button("[ RE-SEED ]"):
+            st.session_state.seed = random.randint(10000, 99999)
+        
+        if 'seed' not in st.session_state:
+            st.session_state.seed = 42839
+            
+        seed_str = st.text_input("[ ENTROPY_SEED ]", value=str(st.session_state.seed))
+        seed_val = int(''.join(filter(str.isdigit, seed_str)) or 0)
 
-col1, col2 = st.columns(2)
+        st.markdown("---")
+        st.markdown('<p class="status-text">◈ NODE_READY</p>', unsafe_allow_html=True)
 
-with col1:
-    st.subheader("INPUT")
-    user_input = st.text_area("Input Zone", height=400, label_visibility="collapsed", key="input")
+    # Hauptbereich
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### INPUT_STREAMS")
+        input_data = st.text_area("Input", height=300, label_visibility="collapsed", placeholder="Enter data to glitch...")
 
-# Berechnung
-try:
-    seed_int = int(''.join(filter(str.isdigit, seed)))
-except:
-    seed_int = 0
+    # Berechnung
+    output_data, status = process_logic(input_data, seed_val)
 
-output_data = process_logic(user_input, seed_int)
+    with col2:
+        st.markdown(f"### OUTPUT_STREAMS ({status})")
+        st.text_area("Output", value=output_data, height=300, label_visibility="collapsed")
+        
+        if st.button("[ COPY TO CLIPBOARD ]"):
+            # In Streamlit ist direktes Copy-to-Clipboard schwierig ohne JS, 
+            # aber man kann den Text einfach markieren oder ein st.code Block nutzen
+            st.info("Mark den Text oben zum Kopieren.")
 
-with col2:
-    st.subheader("OUTPUT")
-    st.text_area("Output Zone", value=output_data, height=400, label_visibility="collapsed", key="output")
+    st.markdown(f'<p class="status-text" style="text-align: center;">◈ CURRENT_SEED: {seed_val} | STATUS: {status}</p>', unsafe_allow_html=True)
 
-if st.button("[ COPY OUTPUT ]"):
-    st.write("Kopiere den Text einfach manuell aus dem rechten Feld.")
+if __name__ == "__main__":
+    main()
