@@ -8,7 +8,6 @@ st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
-    section[data-testid="stSidebar"] { background-color: #050505 !important; }
     
     h1 { margin-bottom: 0px !important; }
     .by-line { font-family: 'Courier', monospace; color: #333; margin-bottom: 25px; font-size: 0.85rem; letter-spacing: 1px; }
@@ -40,8 +39,7 @@ st.markdown("""
         border: 1px solid #00ffcc !important;
         font-family: 'Courier', monospace;
         border-radius: 2px;
-        text-transform: uppercase;
-        height: 3em;
+        height: 3.5em;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
     
@@ -52,7 +50,7 @@ st.markdown("""
         border: 1px solid #222 !important;
         text-align: center;
         font-family: 'Courier', monospace;
-        height: 3em;
+        height: 3.5em;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -64,10 +62,7 @@ def glitch_process(content, seed_val):
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    stripped = content.strip()
-    first_char = stripped[0]
-    
-    # Detection logic
+    first_char = content.strip()[0]
     is_decrypt = GLYPH_BASE <= ord(first_char) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
@@ -93,48 +88,44 @@ def glitch_process(content, seed_val):
 st.title("◈ AQUASINE v20.5")
 st.markdown('<div class="by-line">DESIGNED_BY_VEHMKATER</div>', unsafe_allow_html=True)
 
-# Persistent Seed State
-if 'seed' not in st.session_state:
-    st.session_state.seed = 45739
+# Initialize Session State
+if 'active_seed' not in st.session_state:
+    st.session_state.active_seed = 45739
 
 # --- MAIN INTERFACE ---
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### [ INPUT ]")
-    # key="input_key" sorgt dafür, dass die Eingabe erhalten bleibt
     user_input = st.text_area("In", height=250, label_visibility="collapsed", key="input_key")
     
     c1, c2, c3 = st.columns([2, 1, 2])
     
     with c1:
-        # Trigger
-        run_btn = st.button("◈ RUN PROCESS ◈")
+        run_process = st.button("◈ RUN PROCESS ◈")
     
     with c2:
-        # Manuelle Seed-Eingabe
-        s_input = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed", key="s_field")
-        try:
-            st.session_state.seed = int(''.join(filter(str.isdigit, s_input)) or 0)
-        except:
-            pass
+        # Hier wird der Seed angezeigt und kann geändert werden
+        new_seed_str = st.text_input("S", value=str(st.session_state.active_seed), label_visibility="collapsed")
+        # Update den State nur, wenn die Eingabe eine Zahl ist
+        if new_seed_str.isdigit():
+            st.session_state.active_seed = int(new_seed_str)
             
     with c3:
-        # Randomize
         if st.button("◈ RANDOMIZE SEED ◈"):
-            st.session_state.seed = random.randint(10000, 99999)
+            st.session_state.active_seed = random.randint(10000, 99999)
             st.rerun()
 
-# Berechnung wird immer ausgeführt, wenn Text vorhanden ist
-output_text, mode = glitch_process(user_input, st.session_state.seed)
+# Die Berechnung nutzt jetzt den stabilen active_seed
+output_text, mode = glitch_process(user_input, st.session_state.active_seed)
 
 with col2:
     st.markdown(f"### [ OUTPUT : {mode} ]")
     if output_text:
-        # st.code bietet den besten "Copy-Button" für Handys
+        # st.code hat das Kopier-Icon oben rechts integriert
         st.code(output_text, language=None)
     else:
-        st.info("Awaiting input sequence...")
+        st.info("System operational. Waiting for sequence...")
 
 st.markdown("---")
-st.caption(f"NODE: OPERATIONAL | SEED: {st.session_state.seed}")
+st.caption(f"NODE: ONLINE | SEED: {st.session_state.active_seed}")
