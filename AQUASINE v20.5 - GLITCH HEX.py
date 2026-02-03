@@ -8,10 +8,10 @@ class HexNodeV20_5:
         self.root.geometry("1100x850")
         self.root.configure(bg="#000000")
 
-        # Wir nutzen einen Bereich mit hoher Dichte an interessanten Glyphen:
-        # 0x2A00 (Mathematische Operatoren) bis 0x2C00
-        self.glyph_base = 0x2A00 
-        self.range_size = 512 # Wir bleiben in einem stabilen 512-Zeichen Fenster
+        # ANDROID-SAFE UPDATE: 
+        # 0x2200 (Mathematical Operators) ist auf Mobilgeräten extrem stabil.
+        self.glyph_base = 0x2200 
+        self.range_size = 256 # Exaktes Fenster für verlustfreie Konvertierung
         
         self.setup_ui()
         self.generate_new_seed()
@@ -68,10 +68,11 @@ class HexNodeV20_5:
             self.output_text.delete("1.0", "end")
             return
 
-        seed_val = int(''.join(filter(str.isdigit, self.seed_entry.get())) or "0")
+        seed_str = ''.join(filter(str.isdigit, self.seed_entry.get()))
+        seed_val = int(seed_str) if seed_str else 0
         
-        # Erkennung durch Code-Point-Check
-        is_decrypt = len(content) > 0 and self.glyph_base <= ord(content[0]) <= (self.glyph_base + self.range_size + 1000)
+        # Erkennung durch Code-Point-Check (Prüft ob erstes Zeichen im 0x2200 Block liegt)
+        is_decrypt = len(content) > 0 and self.glyph_base <= ord(content[0]) < (self.glyph_base + self.range_size + 500)
         
         self.status_label.config(text="◈ DECRYPTING..." if is_decrypt else "◈ ENCRYPTING...", fg="#555")
 
@@ -86,16 +87,14 @@ class HexNodeV20_5:
             shift = char_rng.randint(1, 1000)
 
             if not is_decrypt:
-                # ENCRYPT: Sicherer Wrap-around
+                # ENCRYPT: Sicherer Wrap-around in den stabilen Block
                 new_code = self.glyph_base + (ord(char) + shift) % self.range_size
                 res += chr(new_code)
             else:
-                # DECRYPT: Mathematische Umkehrung
+                # DECRYPT: Saubere Rückrechnung ohne Zeichensalat
                 glyph_code = ord(char)
                 orig_code = (glyph_code - self.glyph_base - shift) % self.range_size
-                # ASCII/Unicode-Reconstruction (Versuch, in den lesbaren Bereich zu mappen)
-                # Da Modulo verlustbehaftet sein kann, ist dies ein 'best-fit' für v20.5
-                res += chr(orig_code % 1114111) 
+                res += chr(orig_code % 256)
 
         self.output_text.delete("1.0", "end")
         self.output_text.insert("1.0", res)
