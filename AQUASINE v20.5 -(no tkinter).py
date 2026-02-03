@@ -4,12 +4,13 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 
-# --- CSS FOR CLEAN CYBER LOOK ---
+# --- CSS FOR MOBILE OPTIMIZATION & LOOK ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
     section[data-testid="stSidebar"] { background-color: #050505 !important; }
     
+    /* Input Area */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
@@ -17,10 +18,11 @@ st.markdown("""
         border: 1px solid #222 !important;
     }
     
-    /* Code Block styling to match the pink glitch theme */
-    .stCodeBlock { 
-        border: 1px solid #ff0055 !important; 
-        background-color: #050505 !important;
+    /* Output Area (Pink) with WORD-WRAP for Mobile */
+    div[data-testid="column"]:nth-child(2) textarea {
+        color: #ff0055 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
     }
     
     .stButton>button { 
@@ -32,10 +34,7 @@ st.markdown("""
         height: 3em;
         font-family: 'Courier', monospace;
     }
-    .stButton>button:hover { 
-        border-color: #ff0055 !important; 
-        color: #ff0055 !important; 
-    }
+    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
     h1, h3 { font-family: 'Courier', monospace; color: #00ffcc !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -71,7 +70,7 @@ def glitch_process(content, seed_val):
     return res, "DECRYPTING" if is_decrypt else "ENCRYPTING"
 
 # --- UI STRUCTURE ---
-st.title("◈ AQUASINE v20.5 - GLITCH HEX")
+st.title("◈ AQUASINE v20.5")
 
 with st.sidebar:
     st.markdown("### SYSTEM_CTRL")
@@ -93,17 +92,22 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### [ INPUT_STREAM ]")
-    input_text = st.text_area("In", height=350, label_visibility="collapsed", key="input_key", placeholder="Enter data to process...")
+    input_text = st.text_area("In", height=300, label_visibility="collapsed", key="input_key", placeholder="Enter data...")
     execute = st.button("◈ RUN PROCESS ◈")
 
 output_text, mode = glitch_process(input_text, current_seed)
 
 with col2:
     st.markdown(f"### [ OUTPUT_STREAM : {mode} ]")
-    if output_text:
-        st.code(output_text, language=None)
-    else:
-        st.info("System Idle. Waiting for sequence...")
+    # Using text_area again but with CSS wrap fix for mobile
+    st.text_area(
+        "Out", 
+        value=output_text, 
+        height=300, 
+        label_visibility="collapsed", 
+        key="output_field",
+        disabled=False # False lets users still copy the text easily
+    )
 
 st.markdown("---")
-st.caption(f"AQUASINE CORE ACTIVE | SEED: {current_seed} | NODE_STATUS: OPERATIONAL")
+st.caption(f"SEED: {current_seed} | NODE: OPERATIONAL")
