@@ -8,32 +8,48 @@ st.set_page_config(page_title="AQUASINE v20.5", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
+    section[data-testid="stSidebar"] { background-color: #050505 !important; }
+    
+    /* Input Bereich */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
         font-family: 'Courier New', monospace !important; 
         border: 1px solid #222 !important;
     }
-    /* Spezialfarbe für den Output-Bereich */
-    div[data-testid="column"]:nth-child(2) textarea {
-        color: #ff0055 !important;
+    
+    /* Stabiler Output Bereich */
+    .stCodeBlock { 
+        border: 1px solid #ff0055 !important; 
     }
+    
+    /* Button Styling */
     .stButton>button { 
-        width: 100%; background-color: #111; color: #00ffcc; border: 1px solid #00ffcc; 
+        width: 100%; 
+        background-color: #111 !important; 
+        color: #00ffcc !important; 
+        border: 1px solid #00ffcc !important;
+        font-weight: bold;
+        height: 3em;
+    }
+    .stButton>button:hover { 
+        border-color: #ff0055 !important; 
+        color: #ff0055 !important; 
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- DIE LOGIK ---
 def glitch_process(content, seed_val):
-    if not content:
+    if not content or content.strip() == "":
         return "", "IDLE"
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
     
     # Check ob verschlüsselt oder entschlüsselt (Glyphen-Erkennung)
-    is_decrypt = GLYPH_BASE <= ord(content.strip()[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
+    first_char = content.strip()[0]
+    is_decrypt = GLYPH_BASE <= ord(first_char) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
     for i, char in enumerate(content):
@@ -45,9 +61,11 @@ def glitch_process(content, seed_val):
         shift = char_rng.randint(1, 1000)
 
         if not is_decrypt:
+            # ENCRYPT
             new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
         else:
+            # DECRYPT
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
@@ -55,7 +73,7 @@ def glitch_process(content, seed_val):
     return res, "DECRYPTING" if is_decrypt else "ENCRYPTING"
 
 # --- UI STRUKTUR ---
-st.title("◈ AQUASINE v20.5 - NODE")
+st.title("◈ AQUASINE v20.5 - GLITCH HEX")
 
 # Sidebar für Seed
 with st.sidebar:
@@ -79,16 +97,29 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### [ INPUT_STREAM ]")
-    # Hier tippt der User
-    input_text = st.text_area("In", height=400, label_visibility="collapsed", key="in")
+    # Das Textfeld für die Eingabe
+    input_text = st.text_area("In", height=350, label_visibility="collapsed", key="input_key")
+    
+    # DER BUTTON IST WIEDER DA
+    execute = st.button("◈ RUN PROCESS ◈")
 
-# Logik wird HIER ausgeführt (zwischen den Spalten)
-output_text, mode = glitch_process(input_text, current_seed)
+# Logik-Verarbeitung
+output_text = ""
+mode = "WAITING"
+
+if execute or input_text:
+    output_text, mode = glitch_process(input_text, current_seed)
 
 with col2:
     st.markdown(f"### [ OUTPUT_STREAM : {mode} ]")
-    # Hier wird das Ergebnis SOFORT angezeigt
-    st.text_area("Out", value=output_text, height=400, label_visibility="collapsed", key="out")
+    if output_text:
+        # Nutzung von st.code statt st.text_area für maximale Stabilität der Glyphen
+        st.code(output_text, language=None)
+        
+        # Ein kleiner Button zum schnellen Kopieren (Streamlit Code-Blöcke haben das eingebaut)
+        st.caption("Klicke rechts oben im roten Kasten auf das Icon zum Kopieren.")
+    else:
+        st.info("Input eingeben und Button drücken.")
 
 st.markdown("---")
 st.caption(f"AQUASINE CORE ACTIVE | SEED: {current_seed}")
