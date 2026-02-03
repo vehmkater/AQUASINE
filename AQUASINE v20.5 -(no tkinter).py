@@ -11,6 +11,7 @@ st.markdown("""
     .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
     .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
     
+    /* Input Bereich */
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
@@ -18,11 +19,7 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
-    div[data-testid="column"]:nth-child(2) textarea {
-        color: #ff0055 !important;
-        border: 1px solid #300 !important;
-    }
-    
+    /* Buttons */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
@@ -35,14 +32,23 @@ st.markdown("""
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
+    /* Seed Input */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
         border: 1px solid #111 !important;
         text-align: center;
     }
-    /* Code-Box Design für Copy-Button */
-    .stCodeBlock { border: 1px solid #300 !important; background-color: #050505 !important; color: #ff0055 !important; }
+
+    /* Das neue Output Fenster (Code-Block) */
+    .stCodeBlock { 
+        border: 1px solid #300 !important; 
+        background-color: #050505 !important; 
+    }
+    .stCodeBlock code {
+        color: #ff0055 !important; /* Pinker Text für den Output */
+        font-family: 'Courier New', monospace !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -105,18 +111,12 @@ with col1:
 
 with col2:
     st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_cache}]")
-    # Das große pinke Feld für die Optik
-    st.text_area(
-        "OUT", 
-        value=st.session_state.out_cache, 
-        height=300, 
-        label_visibility="collapsed"
-    )
     
-    # Die Copy-Box (nur sichtbar wenn Inhalt da ist)
+    # Das Output-Fenster ist jetzt direkt das Copy-Fenster
     if st.session_state.out_cache:
-        st.caption("◈ FAST COPY TERMINAL")
         st.code(st.session_state.out_cache, language=None)
+    else:
+        st.info("Awaiting data stream...")
 
 st.markdown("---")
 st.caption(f"STATUS: OPERATIONAL | BY: vehmkater")
