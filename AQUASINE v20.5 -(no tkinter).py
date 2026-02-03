@@ -4,15 +4,13 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
 
-# --- CYBER DESIGN CSS ---
+# --- CSS ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
-    
     .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
     .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
-
-    /* Textfelder */
+    
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
@@ -20,15 +18,12 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
-    /* Output Bereich (Pink) */
+    /* Pink Output Styling */
     div[data-testid="column"]:nth-child(2) textarea {
         color: #ff0055 !important;
-        white-space: pre-wrap !important;
-        word-wrap: break-word !important;
         border: 1px solid #300 !important;
     }
     
-    /* Buttons */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
@@ -39,7 +34,6 @@ st.markdown("""
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
-    /* Inputs */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
@@ -47,19 +41,20 @@ st.markdown("""
         text-align: center;
         border-radius: 0px !important;
     }
-    
     .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CORE LOGIC ---
 def glitch_process(content, seed_val):
-    if not content or content.strip() == "":
-        return "", "..."
+    if not content:
+        return ""
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
     stripped = content.strip()
+    if not stripped: return ""
+    
     is_decrypt = GLYPH_BASE <= ord(stripped[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
@@ -76,15 +71,13 @@ def glitch_process(content, seed_val):
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
-    return res, "DECRYPT" if is_decrypt else "ENCRYPT"
+    return res
 
-# --- SESSION INITIALIZATION ---
-if 'seed' not in st.session_state:
-    st.session_state.seed = 45739
-if 'output' not in st.session_state:
-    st.session_state.output = ""
-if 'mode' not in st.session_state:
-    st.session_state.mode = "..."
+# --- STATE ---
+if 's_val' not in st.session_state:
+    st.session_state.s_val = 45739
+if 'out_data' not in st.session_state:
+    st.session_state.out_data = ""
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -94,41 +87,39 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    user_input = st.text_area("In", height=200, label_visibility="collapsed", key="in_field")
+    # Wir nutzen ein einfaches Text-Area ohne komplexe Key-Bindung für den Input
+    in_text = st.text_area("In", height=200, label_visibility="collapsed")
     
     st.markdown("### ◈ SEED")
-    s_col1, s_col2 = st.columns([4, 1])
-    with s_col1:
-        seed_raw = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
-        if seed_raw:
-            try:
-                st.session_state.seed = int(''.join(filter(str.isdigit, seed_raw)))
+    c_s1, c_s2 = st.columns([4, 1])
+    with c_s1:
+        s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
+        if s_input:
+            try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)))
             except: pass
-    with s_col2:
+    with c_s2:
         if st.button("⌬"):
-            st.session_state.seed = random.randint(10000, 99999)
+            st.session_state.s_val = random.randint(10000, 99999)
             st.rerun()
 
     # Seed Copy Display
-    st.code(f"{st.session_state.seed}", language=None)
+    st.code(f"{st.session_state.s_val}", language=None)
 
     if st.button("◈ EXECUTE ◈"):
-        # Direkte Zuweisung in den Session State
-        res, m = glitch_process(user_input, st.session_state.seed)
-        st.session_state.output = res
-        st.session_state.mode = m
-        st.rerun() # Erzwingt ein UI-Update für den Output
+        # Berechnung und Speicherung
+        st.session_state.out_data = glitch_process(in_text, st.session_state.s_val)
+        st.rerun()
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode}]")
-    # Das Textfeld wird explizit mit dem Session-State-Inhalt gefüllt
+    st.markdown("### ◈ OUTPUT")
+    # Hier wird der Output absolut sicher aus dem State geladen
     st.text_area(
         "Out", 
-        value=st.session_state.output, 
+        value=st.session_state.out_data, 
         height=350, 
-        label_visibility="collapsed", 
-        key="out_display"
+        label_visibility="collapsed",
+        key="permanent_out_display"
     )
 
 st.markdown("---")
-st.caption(f"STATUS: OPERATIONAL | BY: vehmkater")
+st.caption(f"STATUS: ONLINE | BY: vehmkater")
