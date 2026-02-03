@@ -36,6 +36,15 @@ st.markdown("""
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
     h1, h3 { font-family: 'Courier', monospace; color: #00ffcc !important; }
+    
+    /* Styling for the custom footer tag */
+    .vehmkater-tag {
+        font-family: 'Courier', monospace;
+        color: #111;
+        font-size: 0.7rem;
+        text-align: right;
+        margin-top: 50px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -91,23 +100,25 @@ with st.sidebar:
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### [ INPUT_STREAM ]")
+    st.markdown("### [ INPUT ]")
     input_text = st.text_area("In", height=300, label_visibility="collapsed", key="input_key", placeholder="Enter data...")
     execute = st.button("◈ RUN PROCESS ◈")
 
 output_text, mode = glitch_process(input_text, current_seed)
 
 with col2:
-    st.markdown(f"### [ OUTPUT_STREAM : {mode} ]")
-    # Using text_area again but with CSS wrap fix for mobile
+    st.markdown(f"### [ OUTPUT : {mode} ]")
     st.text_area(
         "Out", 
         value=output_text, 
         height=300, 
         label_visibility="collapsed", 
         key="output_field",
-        disabled=False # False lets users still copy the text easily
+        disabled=False 
     )
 
 st.markdown("---")
 st.caption(f"SEED: {current_seed} | NODE: OPERATIONAL")
+
+# Custom hidden/discrete tag
+st.markdown('<div class="vehmkater-tag">vehmkater_v20.5_active</div>', unsafe_allow_html=True)
