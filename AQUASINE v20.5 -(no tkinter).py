@@ -2,14 +2,25 @@ import streamlit as st
 import random
 
 # --- CONFIG ---
-st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
+st.set_page_config(page_title="AQUASINE ENGINE", layout="wide", page_icon="◈")
 
 # --- CSS ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
-    .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
-    .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
+    
+    /* ASCII Header Styling */
+    .ascii-header { 
+        font-family: 'Courier New', monospace; 
+        white-space: pre; 
+        color: #00ffcc; 
+        line-height: 1.2; 
+        font-weight: bold;
+        text-shadow: 0 0 10px #00ffcc;
+        margin-bottom: 20px;
+    }
+    
+    .tagline { color: #222; font-size: 0.8rem; letter-spacing: 5px; margin-bottom: 30px; }
     
     /* Input Bereich */
     .stTextArea textarea { 
@@ -27,10 +38,15 @@ st.markdown("""
         border: 1px solid #111 !important;
         height: 4rem;
         border-radius: 0px !important;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         font-weight: bold;
+        transition: 0.3s;
     }
-    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
+    .stButton>button:hover { 
+        border-color: #ff0055 !important; 
+        color: #ff0055 !important;
+        box-shadow: 0 0 15px #ff0055;
+    }
 
     /* Seed Input */
     .stTextInput input {
@@ -40,17 +56,35 @@ st.markdown("""
         text-align: center;
     }
 
-    /* Das neue Output Fenster (Code-Block) */
+    /* Das Output Fenster (Code-Block) */
     .stCodeBlock { 
         border: 1px solid #300 !important; 
         background-color: #050505 !important; 
     }
     .stCodeBlock code {
-        color: #ff0055 !important; /* Pinker Text für den Output */
-        font-family: 'Courier New', monospace !important;
+        color: #ff0055 !important;
+        font-size: 1.1rem !important;
     }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #111; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff0055; }
     </style>
     """, unsafe_allow_html=True)
+
+# --- ASCII ART HEADER ---
+ascii_banner = """
+ █████╗  ██████╗ ██╗   ██╗ █████╗ ███████╗██╗███╗   ██╗███████╗
+██╔══██╗██╔═══██╗██║   ██║██╔══██╗██╔════╝██║████╗  ██║██╔════╝
+███████║██║   ██║██║   ██║███████║███████╗██║██╔██╗ ██║█████╗  
+██╔══██║██║▄▄ ██║██║   ██║██╔══██║╚════██║██║██║╚██╗██║██╔══╝  
+██║  ██║╚██████╔╝╚██████╔╝██║  ██║███████║██║██║ ╚████║███████╗
+╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝ ENGINE
+"""
+st.markdown(f'<div class="ascii-header">{ascii_banner}</div>', unsafe_allow_html=True)
+st.markdown('<p class="tagline">DESIGNED BY VEHMKATER</p>', unsafe_allow_html=True)
 
 # --- ENGINE ---
 def glitch_engine(content, seed_val):
@@ -80,17 +114,14 @@ if 's_val' not in st.session_state: st.session_state.s_val = 45739
 if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
 if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
-# --- UI ---
-st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
-st.markdown('<p class="tagline">by vehmkater</p>', unsafe_allow_html=True)
-
+# --- UI LAYOUT ---
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### ◈ INPUT")
+    st.markdown("### ◈ DATA_INPUT")
     st.text_area("IN", height=200, label_visibility="collapsed", key="input_buffer")
     
-    st.markdown("### ◈ SEED")
+    st.markdown("### ◈ CORE_SEED")
     c1, c2 = st.columns([4, 1])
     with c1:
         s_raw = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
@@ -103,20 +134,24 @@ with col1:
             
     st.code(f"{st.session_state.s_val}", language=None)
 
-    if st.button("◈ EXECUTE ◈"):
+    if st.button("◈ EXECUTE_TRANSMISSION ◈"):
         raw_text = st.session_state.input_buffer
         res, m = glitch_engine(raw_text, st.session_state.s_val)
         st.session_state.out_cache = res
         st.session_state.mode_cache = m
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_cache}]")
+    st.markdown(f"### ◈ OUTPUT_STREAM [{st.session_state.mode_cache}]")
     
-    # Das Output-Fenster ist jetzt direkt das Copy-Fenster
+    # Das Output-Fenster mit integriertem Copy-Button
     if st.session_state.out_cache:
         st.code(st.session_state.out_cache, language=None)
     else:
-        st.info("Awaiting data stream...")
+        st.markdown("""
+        <div style="border: 1px solid #111; padding: 20px; color: #222; text-align: center;">
+        SYSTEM_IDLE: AWAITING_INPUT...
+        </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption(f"STATUS: OPERATIONAL | BY: vehmkater")
+st.caption(f"AQUASINE_ENGINE | VERSION_20.5 | AUTH: VEHMKATER | NODE_ONLINE")
