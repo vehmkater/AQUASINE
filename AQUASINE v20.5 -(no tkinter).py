@@ -39,7 +39,7 @@ st.markdown("""
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
-    /* Seed Input */
+    /* Inputs */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
@@ -48,7 +48,6 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
-    /* Seed Copy Box */
     .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -79,13 +78,13 @@ def glitch_process(content, seed_val):
             res += chr(orig_code % 256)
     return res, "DECRYPT" if is_decrypt else "ENCRYPT"
 
-# --- SESSION STATE INITIALISIERUNG ---
+# --- SESSION INITIALIZATION ---
 if 'seed' not in st.session_state:
     st.session_state.seed = 45739
-if 'output_cache' not in st.session_state:
-    st.session_state.output_cache = ""
-if 'mode_cache' not in st.session_state:
-    st.session_state.mode_cache = "..."
+if 'output' not in st.session_state:
+    st.session_state.output = ""
+if 'mode' not in st.session_state:
+    st.session_state.mode = "..."
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -101,31 +100,34 @@ with col1:
     s_col1, s_col2 = st.columns([4, 1])
     with s_col1:
         seed_raw = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
-        try:
-            st.session_state.seed = int(''.join(filter(str.isdigit, seed_raw)) or 0)
-        except: pass
+        if seed_raw:
+            try:
+                st.session_state.seed = int(''.join(filter(str.isdigit, seed_raw)))
+            except: pass
     with s_col2:
         if st.button("⌬"):
             st.session_state.seed = random.randint(10000, 99999)
             st.rerun()
 
-    # Seed Copy Display (Wieder da!)
+    # Seed Copy Display
     st.code(f"{st.session_state.seed}", language=None)
 
     if st.button("◈ EXECUTE ◈"):
-        out, m = glitch_process(user_input, st.session_state.seed)
-        st.session_state.output_cache = out
-        st.session_state.mode_cache = m
+        # Direkte Zuweisung in den Session State
+        res, m = glitch_process(user_input, st.session_state.seed)
+        st.session_state.output = res
+        st.session_state.mode = m
+        st.rerun() # Erzwingt ein UI-Update für den Output
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_cache}]")
-    # Das Textfeld nutzt jetzt den Cache, damit der Output stabil bleibt
+    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode}]")
+    # Das Textfeld wird explizit mit dem Session-State-Inhalt gefüllt
     st.text_area(
         "Out", 
-        value=st.session_state.output_cache, 
+        value=st.session_state.output, 
         height=350, 
         label_visibility="collapsed", 
-        key="out_field"
+        key="out_display"
     )
 
 st.markdown("---")
