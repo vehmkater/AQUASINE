@@ -4,68 +4,69 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE ENGINE", layout="wide", page_icon="◈")
 
-# --- CSS (RESPONSIVE OPTIMIZED) ---
+# --- CSS (RESPONSIVE & MOBILE OPTIMIZED) ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
     
-    /* Responsive ASCII / Header */
-    .header-container {
-        text-align: center;
-        padding: 10px;
-    }
+    /* Header Container */
+    .header-box { text-align: center; padding: 10px; margin-bottom: 20px; }
     
-    .mobile-title {
-        font-size: 1.8rem;
-        font-weight: bold;
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px #00ffcc;
-        margin: 0;
-    }
-
+    /* ASCII nur für Desktop (Breite Bildschirme) */
     .ascii-banner { 
         font-family: 'Courier New', monospace; 
         white-space: pre; 
         color: #00ffcc; 
-        line-height: 1; 
-        font-size: 0.6vw; /* Skaliert mit der Breite */
+        font-size: 0.7vw; 
+        line-height: 1.1;
         display: block;
     }
+
+    /* Titel für Mobile (Kompakt) */
+    .mobile-title {
+        display: none;
+        font-size: 1.8rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px #00ffcc;
+    }
     
-    /* Verstecke ASCII auf sehr kleinen Handys, zeige Text-Titel */
-    @media (max-width: 600px) {
+    .tagline { color: #444; font-size: 0.7rem; letter-spacing: 5px; margin-top: 5px; text-transform: uppercase; }
+
+    /* Media Query für Handys */
+    @media (max-width: 800px) {
         .ascii-banner { display: none; }
-        .mobile-title { display: block; font-size: 1.5rem; }
+        .mobile-title { display: block; }
     }
 
-    .tagline { color: #333; font-size: 0.7rem; letter-spacing: 3px; margin-bottom: 20px; }
-    
-    /* Buttons & Inputs */
+    /* Buttons & Inputs Styling */
     .stButton>button { 
-        width: 100%; 
+        width: 100% !important; 
         background-color: #000 !important; 
         color: #00ffcc !important; 
-        border: 1px solid #111 !important;
+        border: 1px solid #222 !important;
         height: 3.5rem;
         border-radius: 0px !important;
-        letter-spacing: 2px;
+        font-weight: bold;
     }
-    
-    /* Code/Output Box */
-    .stCodeBlock { 
-        border: 1px solid #300 !important; 
-        background-color: #050505 !important; 
-    }
-    .stCodeBlock code { color: #ff0055 !important; }
+    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; box-shadow: 0 0 10px #ff0055; }
 
-    /* Fix für Mobile Padding */
-    .block-container { padding-top: 2rem !important; }
+    /* Code/Output Box */
+    .stCodeBlock { border: 1px solid #300 !important; background-color: #050505 !important; }
+    .stCodeBlock code { color: #ff0055 !important; font-size: 1rem !important; }
+
+    /* Input Styling */
+    .stTextArea textarea { background-color: #050505 !important; color: #00ffcc !important; border: 1px solid #111 !important; }
+    .stTextInput input { background-color: #000 !important; color: #00ffcc !important; border: 1px solid #111 !important; text-align: center; }
+    
+    /* Padding Adjustments */
+    .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER ---
+# --- HEADER SECTION ---
 st.markdown("""
-    <div class="header-container">
+    <div class="header-box">
         <div class="ascii-banner">
  █████╗  ██████╗ ██╗   ██╗ █████╗ ███████╗██╗███╗   ██╗███████╗
 ██╔══██╗██╔═══██╗██║   ██║██╔══██╗██╔════╝██║████╗  ██║██╔════╝
@@ -108,26 +109,27 @@ if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
 if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
 # --- UI LAYOUT ---
-# Auf dem Handy werden diese Spalten automatisch untereinander angezeigt
-col1, col2 = st.columns([1, 1])
+# Spalten-Verhältnis optimiert für Desktop, stapelt sich auf Mobile
+col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
     st.markdown("### ◈ INPUT")
-    st.text_area("IN", height=150, label_visibility="collapsed", key="input_buffer")
+    st.text_area("IN", height=180, label_visibility="collapsed", key="input_buffer")
     
-    c1, c2 = st.columns([3, 1])
-    with c1:
-        s_raw = st.text_input("SEED", value=str(st.session_state.s_val), label_visibility="collapsed")
+    st.markdown("### ◈ SEED")
+    c_s1, c_s2 = st.columns([4, 1])
+    with c_s1:
+        s_raw = st.text_input("SEED_VAL", value=str(st.session_state.s_val), label_visibility="collapsed")
         try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_raw)) or 0)
         except: pass
-    with c2:
+    with c_s2:
         if st.button("⌬"):
             st.session_state.s_val = random.randint(10000, 99999)
             st.rerun()
             
     st.code(f"S: {st.session_state.s_val}", language=None)
 
-    if st.button("◈ EXECUTE ◈"):
+    if st.button("◈ EXECUTE TRANSMISSION ◈"):
         res, m = glitch_engine(st.session_state.input_buffer, st.session_state.s_val)
         st.session_state.out_cache = res
         st.session_state.mode_cache = m
@@ -137,7 +139,11 @@ with col2:
     if st.session_state.out_cache:
         st.code(st.session_state.out_cache, language=None)
     else:
-        st.markdown('<div style="color:#222; text-align:center; padding:20px; border:1px solid #111;">AWAITING...</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="border: 1px solid #111; padding: 40px; color: #222; text-align: center; font-style: italic;">
+        AWAITING_UPLINK...
+        </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption(f"AQUASINE | AUTH: VEHMKATER")
+st.caption(f"AQUASINE ENGINE | AUTH: VEHMKATER | STABLE_BUILD_20.5")
