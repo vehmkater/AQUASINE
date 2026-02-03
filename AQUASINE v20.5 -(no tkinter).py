@@ -4,25 +4,24 @@ import random
 # --- CONFIG ---
 st.set_page_config(page_title="AQUASINE ENGINE", layout="wide", page_icon="◈")
 
-# --- CSS (RESPONSIVE & MOBILE OPTIMIZED) ---
+# --- CSS (ULTIMATE RESPONSIVE) ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; font-family: 'Courier New', monospace; }
     
-    /* Header Container */
     .header-box { text-align: center; padding: 10px; margin-bottom: 20px; }
     
-    /* ASCII nur für Desktop (Breite Bildschirme) */
+    /* ASCII Banner - Skaliert dynamisch */
     .ascii-banner { 
         font-family: 'Courier New', monospace; 
         white-space: pre; 
         color: #00ffcc; 
-        font-size: 0.7vw; 
+        font-size: 0.8vw; 
         line-height: 1.1;
         display: block;
+        filter: drop-shadow(0 0 5px #00ffcc);
     }
 
-    /* Titel für Mobile (Kompakt) */
     .mobile-title {
         display: none;
         font-size: 1.8rem;
@@ -31,15 +30,14 @@ st.markdown("""
         text-shadow: 0 0 10px #00ffcc;
     }
     
-    .tagline { color: #444; font-size: 0.7rem; letter-spacing: 5px; margin-top: 5px; text-transform: uppercase; }
+    .tagline { color: #444; font-size: 0.7rem; letter-spacing: 5px; margin-top: 5px; }
 
-    /* Media Query für Handys */
-    @media (max-width: 800px) {
+    @media (max-width: 850px) {
         .ascii-banner { display: none; }
         .mobile-title { display: block; }
     }
 
-    /* Buttons & Inputs Styling */
+    /* Buttons */
     .stButton>button { 
         width: 100% !important; 
         background-color: #000 !important; 
@@ -48,23 +46,23 @@ st.markdown("""
         height: 3.5rem;
         border-radius: 0px !important;
         font-weight: bold;
+        transition: 0.2s;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; box-shadow: 0 0 10px #ff0055; }
 
-    /* Code/Output Box */
+    /* Output Styling */
     .stCodeBlock { border: 1px solid #300 !important; background-color: #050505 !important; }
     .stCodeBlock code { color: #ff0055 !important; font-size: 1rem !important; }
 
-    /* Input Styling */
-    .stTextArea textarea { background-color: #050505 !important; color: #00ffcc !important; border: 1px solid #111 !important; }
-    .stTextInput input { background-color: #000 !important; color: #00ffcc !important; border: 1px solid #111 !important; text-align: center; }
+    /* Input & Seed */
+    .stTextArea textarea { background-color: #050505 !important; color: #00ffcc !important; border: 1px solid #111 !important; border-radius: 0px !important; }
+    .stTextInput input { background-color: #000 !important; color: #00ffcc !important; border: 1px solid #111 !important; text-align: center; border-radius: 0px !important; }
     
-    /* Padding Adjustments */
-    .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+    .block-container { padding-top: 2rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER SECTION ---
+# --- HEADER ---
 st.markdown("""
     <div class="header-box">
         <div class="ascii-banner">
@@ -108,18 +106,17 @@ if 's_val' not in st.session_state: st.session_state.s_val = 45739
 if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
 if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
-# --- UI LAYOUT ---
-# Spalten-Verhältnis optimiert für Desktop, stapelt sich auf Mobile
+# --- UI ---
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
     st.markdown("### ◈ INPUT")
-    st.text_area("IN", height=180, label_visibility="collapsed", key="input_buffer")
+    st.text_area("IN", height=200, label_visibility="collapsed", key="input_buffer")
     
     st.markdown("### ◈ SEED")
     c_s1, c_s2 = st.columns([4, 1])
     with c_s1:
-        s_raw = st.text_input("SEED_VAL", value=str(st.session_state.s_val), label_visibility="collapsed")
+        s_raw = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
         try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_raw)) or 0)
         except: pass
     with c_s2:
@@ -139,11 +136,7 @@ with col2:
     if st.session_state.out_cache:
         st.code(st.session_state.out_cache, language=None)
     else:
-        st.markdown("""
-        <div style="border: 1px solid #111; padding: 40px; color: #222; text-align: center; font-style: italic;">
-        AWAITING_UPLINK...
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div style="border:1px solid #111; padding:40px; color:#222; text-align:center;">AWAITING_UPLINK...</div>', unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption(f"AQUASINE ENGINE | AUTH: VEHMKATER | STABLE_BUILD_20.5")
+st.caption(f"AQUASINE ENGINE | AUTH: VEHMKATER | BUILD_20.5")
