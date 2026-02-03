@@ -18,19 +18,21 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
-    /* Pink Output Styling */
+    /* Pink Output */
     div[data-testid="column"]:nth-child(2) textarea {
         color: #ff0055 !important;
         border: 1px solid #300 !important;
     }
     
-    .stButton>button { 
+    /* Buttons */
+    .stButton>button, .stForm submit_button { 
         width: 100%; 
         background-color: #000 !important; 
         color: #00ffcc !important; 
         border: 1px solid #222 !important;
         height: 3.5rem;
         border-radius: 0px !important;
+        letter-spacing: 2px;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
@@ -87,39 +89,47 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    # Wir nutzen ein einfaches Text-Area ohne komplexe Key-Bindung für den Input
-    in_text = st.text_area("In", height=200, label_visibility="collapsed")
     
-    st.markdown("### ◈ SEED")
-    c_s1, c_s2 = st.columns([4, 1])
-    with c_s1:
-        s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
-        if s_input:
-            try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)))
+    # FORM BLOCK START (Garantiert Datenübertragung)
+    with st.form("input_form", clear_on_submit=False):
+        in_text = st.text_area("Input Stream", height=200, label_visibility="collapsed")
+        
+        st.markdown("### ◈ SEED")
+        c_s1, c_s2 = st.columns([4, 1])
+        with c_s1:
+            # Seed Eingabe direkt in der Form
+            s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
+        with c_s2:
+            # Randomize muss außerhalb der Form liegen oder wir machen es einfach manuell
+            st.markdown(" ") # Spacer
+            
+        submitted = st.form_submit_button("◈ EXECUTE ◈")
+        
+        if submitted:
+            try:
+                st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)) or st.session_state.s_val)
             except: pass
-    with c_s2:
-        if st.button("⌬"):
-            st.session_state.s_val = random.randint(10000, 99999)
+            st.session_state.out_data = glitch_process(in_text, st.session_state.s_val)
             st.rerun()
+
+    # Random Button außerhalb der Form für UI Refresh
+    if st.button("⌬ RANDOMIZE SEED"):
+        st.session_state.seed = random.randint(10000, 99999)
+        st.session_state.s_val = st.session_state.seed
+        st.rerun()
 
     # Seed Copy Display
     st.code(f"{st.session_state.s_val}", language=None)
 
-    if st.button("◈ EXECUTE ◈"):
-        # Berechnung und Speicherung
-        st.session_state.out_data = glitch_process(in_text, st.session_state.s_val)
-        st.rerun()
-
 with col2:
     st.markdown("### ◈ OUTPUT")
-    # Hier wird der Output absolut sicher aus dem State geladen
     st.text_area(
         "Out", 
         value=st.session_state.out_data, 
-        height=350, 
+        height=450, 
         label_visibility="collapsed",
-        key="permanent_out_display"
+        key="display_out"
     )
 
 st.markdown("---")
-st.caption(f"STATUS: ONLINE | BY: vehmkater")
+st.caption(f"STATUS: ONLINE | DESIGN: vehmkater")
