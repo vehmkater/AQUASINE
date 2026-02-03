@@ -11,11 +11,13 @@ st.markdown("""
     .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
     .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
     
+    /* Textfelder */
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
         border: 1px solid #111 !important;
         border-radius: 0px !important;
+        font-size: 1.1rem !important;
     }
     
     /* Pink Output */
@@ -25,51 +27,48 @@ st.markdown("""
     }
     
     /* Buttons */
-    .stButton>button, .stForm submit_button { 
+    .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
         color: #00ffcc !important; 
-        border: 1px solid #222 !important;
-        height: 3.5rem;
+        border: 1px solid #111 !important;
+        height: 3rem;
         border-radius: 0px !important;
-        letter-spacing: 2px;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
+    /* Input */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
         border: 1px solid #111 !important;
         text-align: center;
-        border-radius: 0px !important;
     }
     .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CORE LOGIC ---
-def glitch_process(content, seed_val):
+def glitch_process(content, seed_val, mode):
     if not content:
         return ""
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    stripped = content.strip()
-    if not stripped: return ""
-    
-    is_decrypt = GLYPH_BASE <= ord(stripped[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
-    
     res = ""
+    
     for i, char in enumerate(content):
         if char in (" ", "\n"):
             res += char
             continue
+        
         char_rng = random.Random(seed_val + i)
         shift = char_rng.randint(1, 1000)
-        if not is_decrypt:
+        
+        if mode == "ENCRYPT":
             new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
-        else:
+        else: # DECRYPT
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
@@ -78,8 +77,8 @@ def glitch_process(content, seed_val):
 # --- STATE ---
 if 's_val' not in st.session_state:
     st.session_state.s_val = 45739
-if 'out_data' not in st.session_state:
-    st.session_state.out_data = ""
+if 'out_text' not in st.session_state:
+    st.session_state.out_text = ""
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -89,47 +88,36 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
+    in_data = st.text_area("IN", height=200, label_visibility="collapsed")
     
-    # FORM BLOCK START (Garantiert Datenübertragung)
-    with st.form("input_form", clear_on_submit=False):
-        in_text = st.text_area("Input Stream", height=200, label_visibility="collapsed")
-        
-        st.markdown("### ◈ SEED")
-        c_s1, c_s2 = st.columns([4, 1])
-        with c_s1:
-            # Seed Eingabe direkt in der Form
-            s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
-        with c_s2:
-            # Randomize muss außerhalb der Form liegen oder wir machen es einfach manuell
-            st.markdown(" ") # Spacer
-            
-        submitted = st.form_submit_button("◈ EXECUTE ◈")
-        
-        if submitted:
-            try:
-                st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)) or st.session_state.s_val)
-            except: pass
-            st.session_state.out_data = glitch_process(in_text, st.session_state.s_val)
+    st.markdown("### ◈ SEED")
+    c1, c2 = st.columns([4, 1])
+    with c1:
+        s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
+        try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)) or 0)
+        except: pass
+    with c2:
+        if st.button("⌬"):
+            st.session_state.s_val = random.randint(10000, 99999)
             st.rerun()
-
-    # Random Button außerhalb der Form für UI Refresh
-    if st.button("⌬ RANDOMIZE SEED"):
-        st.session_state.seed = random.randint(10000, 99999)
-        st.session_state.s_val = st.session_state.seed
-        st.rerun()
-
-    # Seed Copy Display
+            
     st.code(f"{st.session_state.s_val}", language=None)
 
+    # Manuelle Modus-Wahl für garantierte Funktion
+    mode_choice = st.radio("MODE", ["ENCRYPT", "DECRYPT"], horizontal=True, label_visibility="collapsed")
+    
+    if st.button("◈ EXECUTE ◈"):
+        # Direkte Berechnung ohne Umwege
+        st.session_state.out_text = glitch_process(in_data, st.session_state.s_val, mode_choice)
+
 with col2:
-    st.markdown("### ◈ OUTPUT")
+    st.markdown(f"### ◈ OUTPUT [{mode_choice}]")
     st.text_area(
-        "Out", 
-        value=st.session_state.out_data, 
-        height=450, 
-        label_visibility="collapsed",
-        key="display_out"
+        "OUT", 
+        value=st.session_state.out_text, 
+        height=385, 
+        label_visibility="collapsed"
     )
 
 st.markdown("---")
-st.caption(f"STATUS: ONLINE | DESIGN: vehmkater")
+st.caption(f"STATUS: OPERATIONAL | BY: vehmkater")
