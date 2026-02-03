@@ -11,35 +11,30 @@ st.markdown("""
     .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
     .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
     
-    /* Textfelder */
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
         border: 1px solid #111 !important;
         border-radius: 0px !important;
-        font-size: 1.1rem !important;
     }
     
-    /* Pink Output */
     div[data-testid="column"]:nth-child(2) textarea {
         color: #ff0055 !important;
         border: 1px solid #300 !important;
     }
     
-    /* Buttons */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
         color: #00ffcc !important; 
         border: 1px solid #111 !important;
-        height: 3.5rem;
+        height: 4rem;
         border-radius: 0px !important;
-        font-weight: bold;
         letter-spacing: 2px;
+        font-weight: bold;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
-    /* Input */
     .stTextInput input {
         background-color: #000 !important;
         color: #00ffcc !important;
@@ -47,47 +42,38 @@ st.markdown("""
         text-align: center;
     }
     .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
-    
-    /* Radio Buttons Styling */
-    .stRadio div[role="radiogroup"] { 
-        padding: 10px; 
-        border: 1px solid #111; 
-        background: #050505;
-    }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CORE ENGINE ---
-def glitch_process(content, seed_val, mode):
-    if not content:
-        return ""
+def glitch_engine(content, seed_val):
+    if not content: return "", "..."
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    res = ""
+    # Auto-Erkennung: Prüfe die ersten Zeichen auf Glyphen
+    is_decrypt = any(GLYPH_BASE <= ord(c) < (GLYPH_BASE + RANGE_SIZE + 500) for c in content[:10])
     
+    res = ""
     for i, char in enumerate(content):
         if char in (" ", "\n"):
             res += char
             continue
-        
         char_rng = random.Random(seed_val + i)
         shift = char_rng.randint(1, 1000)
-        
-        if mode == "ENCRYPT":
+        if not is_decrypt:
             new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
-        else: # DECRYPT
+        else:
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
-    return res
+    return res, "DECRYPT" if is_decrypt else "ENCRYPT"
 
-# --- STATE ---
-if 's_val' not in st.session_state:
-    st.session_state.s_val = 45739
-if 'out_text' not in st.session_state:
-    st.session_state.out_text = ""
+# --- STATE MANAGEMENT ---
+if 's_val' not in st.session_state: st.session_state.s_val = 45739
+if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
+if 'mode_cache' not in st.session_state: st.session_state.mode_cache = "..."
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -97,15 +83,14 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    # Wir nutzen denselben Widget-Typ wie in deinem funktionierenden Code
-    in_data = st.text_area("IN", height=200, label_visibility="collapsed")
+    # Der Key "input_buffer" ist entscheidend - er speichert den Text permanent
+    st.text_area("IN", height=200, label_visibility="collapsed", key="input_buffer")
     
     st.markdown("### ◈ SEED")
     c1, c2 = st.columns([4, 1])
     with c1:
-        s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
-        try: 
-            st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)) or 0)
+        s_raw = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
+        try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_raw)) or 0)
         except: pass
     with c2:
         if st.button("⌬"):
@@ -114,20 +99,20 @@ with col1:
             
     st.code(f"{st.session_state.s_val}", language=None)
 
-    # Die Modus-Wahl ist der Stabilitäts-Anker
-    mode_choice = st.radio("◈ SELECTION", ["ENCRYPT", "DECRYPT"], horizontal=True)
-    
-    # Der Execute Button
+    # EIN BUTTON VERSION
     if st.button("◈ EXECUTE ◈"):
-        # Direkte Berechnung wie im stabilen Vorbild
-        st.session_state.out_text = glitch_process(in_data, st.session_state.s_val, mode_choice)
+        # Wir holen den Text direkt aus dem permanenten Speicher "input_buffer"
+        raw_text = st.session_state.input_buffer
+        res, m = glitch_engine(raw_text, st.session_state.s_val)
+        st.session_state.out_cache = res
+        st.session_state.mode_cache = m
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{mode_choice}]")
+    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_cache}]")
     st.text_area(
         "OUT", 
-        value=st.session_state.out_text, 
-        height=405, 
+        value=st.session_state.out_cache, 
+        height=450, 
         label_visibility="collapsed"
     )
 
