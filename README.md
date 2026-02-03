@@ -8,13 +8,16 @@
               >> HEX-SHIFT ENTROPY NODE v20.6 <<
 ```
 
-# ⚡ AQUASINE v20.5 | GLITCH_HEX NODE
+# ⎋ AQUASINE v20.5
 
 ![Version](https://img.shields.io/badge/Version-20.5-00ffcc?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Stable_Roots-ff0055?style=for-the-badge)
 ![Engine](https://img.shields.io/badge/Engine-Unicode_Entropy-white?style=for-the-badge)
 
+
 **AQUASINE** is a high-frequency Hex-Shift generator that transforms ordinary text into an unreadable stream of mathematical glyphs and cryptic Unicode blocks. Version 20.5 abandons static pools in favor of direct **Unicode Point Manipulation**.
+
+By shifting character codes directly into the mathematical Unicode block, it creates unique, glitchy textures that are 100% reversible with the correct seed.
 
 ---
 
