@@ -12,7 +12,7 @@ st.markdown("""
     .title { font-size: 2rem; font-weight: bold; letter-spacing: 5px; color: #00ffcc; margin-bottom: 0px; }
     .tagline { color: #222; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px; }
 
-    /* Input Styling */
+    /* Textfelder */
     .stTextArea textarea { 
         background-color: #050505 !important; 
         color: #00ffcc !important; 
@@ -20,14 +20,15 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
-    /* Output Box Styling (Pink) */
-    .stCodeBlock { 
-        border: 1px solid #300 !important; 
-        background-color: #050505 !important; 
+    /* Output Bereich (Pink) */
+    div[data-testid="column"]:nth-child(2) textarea {
+        color: #ff0055 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        border: 1px solid #300 !important;
     }
-    code { color: #ff0055 !important; white-space: pre-wrap !important; }
     
-    /* Button Styling */
+    /* Buttons */
     .stButton>button { 
         width: 100%; 
         background-color: #000 !important; 
@@ -46,6 +47,9 @@ st.markdown("""
         text-align: center;
         border-radius: 0px !important;
     }
+    
+    /* Seed Copy Box */
+    .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -57,7 +61,6 @@ def glitch_process(content, seed_val):
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
     stripped = content.strip()
-    # Check for existing glyphs to toggle mode
     is_decrypt = GLYPH_BASE <= ord(stripped[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
     
     res = ""
@@ -76,23 +79,23 @@ def glitch_process(content, seed_val):
             res += chr(orig_code % 256)
     return res, "DECRYPT" if is_decrypt else "ENCRYPT"
 
-# --- SESSION STATE ---
+# --- SESSION STATE INITIALISIERUNG ---
 if 'seed' not in st.session_state:
     st.session_state.seed = 45739
-if 'buffer' not in st.session_state:
-    st.session_state.buffer = ""
-if 'mode_status' not in st.session_state:
-    st.session_state.mode_status = "IDLE"
+if 'output_cache' not in st.session_state:
+    st.session_state.output_cache = ""
+if 'mode_cache' not in st.session_state:
+    st.session_state.mode_cache = "..."
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
-st.markdown('<p class="tagline">BY_VEHMKATER_NODE_01</p>', unsafe_allow_html=True)
+st.markdown('<p class="tagline">vehmkater</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    user_input = st.text_area("In", height=200, label_visibility="collapsed", key="user_in")
+    user_input = st.text_area("In", height=200, label_visibility="collapsed", key="in_field")
     
     st.markdown("### ◈ SEED")
     s_col1, s_col2 = st.columns([4, 1])
@@ -106,19 +109,24 @@ with col1:
             st.session_state.seed = random.randint(10000, 99999)
             st.rerun()
 
+    # Seed Copy Display (Wieder da!)
+    st.code(f"{st.session_state.seed}", language=None)
+
     if st.button("◈ EXECUTE ◈"):
         out, m = glitch_process(user_input, st.session_state.seed)
-        st.session_state.buffer = out
-        st.session_state.mode_status = m
+        st.session_state.output_cache = out
+        st.session_state.mode_cache = m
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_status}]")
-    if st.session_state.buffer:
-        # Wir nutzen st.code für den Output, da es am stabilsten für Glyphen ist
-        st.code(st.session_state.buffer, language=None)
-        st.caption("Double-click above to select and copy sequence.")
-    else:
-        st.text_area("...", value="", height=200, disabled=True, label_visibility="collapsed")
+    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_cache}]")
+    # Das Textfeld nutzt jetzt den Cache, damit der Output stabil bleibt
+    st.text_area(
+        "Out", 
+        value=st.session_state.output_cache, 
+        height=350, 
+        label_visibility="collapsed", 
+        key="out_field"
+    )
 
 st.markdown("---")
-st.caption(f"STATUS: OPERATIONAL | CORE_SEED: {st.session_state.seed}")
+st.caption(f"STATUS: OPERATIONAL | BY: vehmkater")
