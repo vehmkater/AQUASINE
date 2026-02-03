@@ -18,6 +18,7 @@ st.markdown("""
         border-radius: 0px !important;
     }
     
+    /* Pink Output Styling */
     div[data-testid="column"]:nth-child(2) textarea {
         color: #ff0055 !important;
         border: 1px solid #300 !important;
@@ -30,6 +31,7 @@ st.markdown("""
         border: 1px solid #111 !important;
         height: 3.5rem;
         border-radius: 0px !important;
+        letter-spacing: 1px;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
 
@@ -38,43 +40,40 @@ st.markdown("""
         color: #00ffcc !important;
         border: 1px solid #111 !important;
         text-align: center;
+        border-radius: 0px !important;
     }
     .stCodeBlock { border: 1px solid #111 !important; background-color: #050505 !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CORE LOGIC ---
-def glitch_process(content, seed_val):
-    if not content: return "", "..."
+def glitch_engine(content, seed_val, mode):
+    if not content: return ""
     
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
-    stripped = content.strip()
-    if not stripped: return "", "..."
-    
-    # Check if first char is a glyph
-    is_decrypt = GLYPH_BASE <= ord(stripped[0]) < (GLYPH_BASE + RANGE_SIZE + 500)
-    
     res = ""
+    
     for i, char in enumerate(content):
         if char in (" ", "\n"):
             res += char
             continue
+        
         char_rng = random.Random(seed_val + i)
         shift = char_rng.randint(1, 1000)
-        if not is_decrypt:
+        
+        if mode == "ENCRYPT":
             new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
             res += chr(new_code)
-        else:
+        else: # DECRYPT
             glyph_code = ord(char)
             orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
             res += chr(orig_code % 256)
-    return res, "DECRYPT" if is_decrypt else "ENCRYPT"
+    return res
 
-# --- PERSISTENT STATE ---
-if 'seed' not in st.session_state: st.session_state.seed = 45739
-if 'out_cache' not in st.session_state: st.session_state.out_cache = ""
-if 'mode_label' not in st.session_state: st.session_state.mode_label = "..."
+# --- STATE ---
+if 's_val' not in st.session_state: st.session_state.s_val = 45739
+if 'out_data' not in st.session_state: st.session_state.out_data = ""
 
 # --- UI ---
 st.markdown('<p class="title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
@@ -84,42 +83,41 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### ◈ INPUT")
-    # Der Trick: Wir weisen dem Input einen festen Key zu
-    in_data = st.text_area("IN", height=200, label_visibility="collapsed", key="user_input_key")
+    # Buffer Key für Stabilität
+    in_text = st.text_area("IN", height=200, label_visibility="collapsed", key="input_buffer")
     
     st.markdown("### ◈ SEED")
-    c1, c2 = st.columns([4, 1])
-    with c1:
-        s_val = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
-        try: st.session_state.seed = int(''.join(filter(str.isdigit, s_val)) or 0)
+    c_s1, c_s2 = st.columns([4, 1])
+    with c_s1:
+        s_input = st.text_input("S", value=str(st.session_state.s_val), label_visibility="collapsed")
+        try: st.session_state.s_val = int(''.join(filter(str.isdigit, s_input)) or 0)
         except: pass
-    with c2:
+    with c_s2:
         if st.button("⌬"):
-            st.session_state.seed = random.randint(10000, 99999)
+            st.session_state.s_val = random.randint(10000, 99999)
             st.rerun()
-            
-    st.code(f"{st.session_state.seed}", language=None)
 
-    # EXECUTE greift jetzt direkt auf den State des Textfeldes zu
-    if st.button("◈ EXECUTE ◈"):
-        # WICHTIG: Wir holen die Daten direkt aus dem Key-Speicher
-        raw_text = st.session_state.user_input_key
-        if raw_text:
-            out, m = glitch_process(raw_text, st.session_state.seed)
-            st.session_state.out_cache = out
-            st.session_state.mode_label = m
-        else:
-            st.session_state.out_cache = "ERROR: NO_INPUT_DETECTED"
+    # Seed Copy Display
+    st.code(f"{st.session_state.s_val}", language=None)
+
+    # Die zwei Aktions-Buttons nebeneinander
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button("◈ ENCRYPT"):
+            st.session_state.out_data = glitch_engine(st.session_state.input_buffer, st.session_state.s_val, "ENCRYPT")
+    with btn_col2:
+        if st.button("◈ DECRYPT"):
+            st.session_state.out_data = glitch_engine(st.session_state.input_buffer, st.session_state.s_val, "DECRYPT")
 
 with col2:
-    st.markdown(f"### ◈ OUTPUT [{st.session_state.mode_label}]")
+    st.markdown("### ◈ OUTPUT")
     st.text_area(
         "OUT", 
-        value=st.session_state.out_cache, 
-        height=385, 
+        value=st.session_state.out_data, 
+        height=450, 
         label_visibility="collapsed",
-        key="static_output_field"
+        key="final_output_field"
     )
 
 st.markdown("---")
-st.caption(f"STATUS: OPERATIONAL | DESIGN: vehmkater")
+st.caption(f"STATUS: ONLINE | NODE: 01 | BY: vehmkater")
