@@ -1,16 +1,16 @@
 import streamlit as st
 import random
 
-# --- SEITEN-LAYOUT ---
+# --- CONFIG ---
 st.set_page_config(page_title="AQUASINE v20.5", layout="wide")
 
-# --- CSS FÜR CYBER-LOOK ---
+# --- CSS FOR CYBER LOOK ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00ffcc; }
     section[data-testid="stSidebar"] { background-color: #050505 !important; }
     
-    /* Input Bereich */
+    /* Input Area */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
@@ -18,9 +18,10 @@ st.markdown("""
         border: 1px solid #222 !important;
     }
     
-    /* Stabiler Output Bereich */
+    /* Stable Output Box */
     .stCodeBlock { 
         border: 1px solid #ff0055 !important; 
+        background-color: #050505 !important;
     }
     
     /* Button Styling */
@@ -31,15 +32,17 @@ st.markdown("""
         border: 1px solid #00ffcc !important;
         font-weight: bold;
         height: 3em;
+        font-family: 'Courier', monospace;
     }
     .stButton>button:hover { 
         border-color: #ff0055 !important; 
         color: #ff0055 !important; 
     }
+    h3 { font-family: 'Courier', monospace; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- DIE LOGIK ---
+# --- CORE LOGIC ---
 def glitch_process(content, seed_val):
     if not content or content.strip() == "":
         return "", "IDLE"
@@ -47,7 +50,7 @@ def glitch_process(content, seed_val):
     GLYPH_BASE = 0x2200
     RANGE_SIZE = 256
     
-    # Check ob verschlüsselt oder entschlüsselt (Glyphen-Erkennung)
+    # Detection: Is the first character from the glyph block?
     first_char = content.strip()[0]
     is_decrypt = GLYPH_BASE <= ord(first_char) < (GLYPH_BASE + RANGE_SIZE + 500)
     
@@ -72,10 +75,10 @@ def glitch_process(content, seed_val):
             
     return res, "DECRYPTING" if is_decrypt else "ENCRYPTING"
 
-# --- UI STRUKTUR ---
+# --- UI STRUCTURE ---
 st.title("◈ AQUASINE v20.5 - GLITCH HEX")
 
-# Sidebar für Seed
+# Sidebar for Entropy Control
 with st.sidebar:
     st.markdown("### SYSTEM_CTRL")
     if 'seed' not in st.session_state:
@@ -92,18 +95,18 @@ with st.sidebar:
     except:
         current_seed = 0
 
-# Haupt-Interface
+# Main Interface Layout
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### [ INPUT_STREAM ]")
-    # Das Textfeld für die Eingabe
-    input_text = st.text_area("In", height=350, label_visibility="collapsed", key="input_key")
+    # Text input field
+    input_text = st.text_area("In", height=350, label_visibility="collapsed", key="input_key", placeholder="Waiting for data input...")
     
-    # DER BUTTON IST WIEDER DA
+    # Execution trigger
     execute = st.button("◈ RUN PROCESS ◈")
 
-# Logik-Verarbeitung
+# Processing logic
 output_text = ""
 mode = "WAITING"
 
@@ -113,13 +116,11 @@ if execute or input_text:
 with col2:
     st.markdown(f"### [ OUTPUT_STREAM : {mode} ]")
     if output_text:
-        # Nutzung von st.code statt st.text_area für maximale Stabilität der Glyphen
+        # Render stable output using st.code
         st.code(output_text, language=None)
-        
-        # Ein kleiner Button zum schnellen Kopieren (Streamlit Code-Blöcke haben das eingebaut)
-        st.caption("Klicke rechts oben im roten Kasten auf das Icon zum Kopieren.")
+        st.caption("Use the icon in the top-right corner of the red box to copy.")
     else:
-        st.info("Input eingeben und Button drücken.")
+        st.info("Input data required. Press 'Run Process' to execute.")
 
 st.markdown("---")
-st.caption(f"AQUASINE CORE ACTIVE | SEED: {current_seed}")
+st.caption(f"AQUASINE CORE ACTIVE | SEED: {current_seed} | NODE_STATUS: OPERATIONAL")
