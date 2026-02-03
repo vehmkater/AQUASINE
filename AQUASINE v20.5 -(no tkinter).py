@@ -12,14 +12,14 @@ st.markdown("""
     
     /* Headers & Subtitles */
     h1 { margin-bottom: 0px !important; }
-    .by-line { font-family: 'Courier', monospace; color: #444; margin-bottom: 30px; font-size: 0.9rem; }
+    .by-line { font-family: 'Courier', monospace; color: #333; margin-bottom: 25px; font-size: 0.85rem; letter-spacing: 1px; }
     
     /* Input Areas */
     .stTextArea textarea { 
         background-color: #0a0a0a !important; 
         color: #00ffcc !important; 
         font-family: 'Courier New', monospace !important; 
-        border: 1px solid #222 !important;
+        border: 1px solid #111 !important;
     }
     
     /* Output Area (Pink) */
@@ -27,26 +27,31 @@ st.markdown("""
         color: #ff0055 !important;
         white-space: pre-wrap !important;
         word-wrap: break-word !important;
+        border: 1px solid #300 !important;
     }
     
     /* Buttons Styling */
     .stButton>button { 
         width: 100%; 
-        background-color: #111 !important; 
+        background-color: #000 !important; 
         color: #00ffcc !important; 
         border: 1px solid #00ffcc !important;
-        font-weight: bold;
         font-family: 'Courier', monospace;
+        border-radius: 4px;
     }
     .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; }
     
     /* Compact Seed Input */
     .stTextInput input {
-        background-color: #0a0a0a !important;
+        background-color: #000 !important;
         color: #00ffcc !important;
         border: 1px solid #222 !important;
         text-align: center;
+        font-family: 'Courier', monospace;
     }
+    
+    /* Tooltip / Info Box */
+    .stInfo { background-color: #050505 !important; color: #444 !important; border: 1px solid #111 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -82,21 +87,21 @@ def glitch_process(content, seed_val):
 
 # --- UI STRUCTURE ---
 st.title("◈ AQUASINE v20.5")
-st.markdown('<div class="by-line">by vehmkater</div>', unsafe_allow_html=True)
+st.markdown('<div class="by-line">DESIGNED_BY_VEHMKATER</div>', unsafe_allow_html=True)
 
 # Session State for Seed
 if 'seed' not in st.session_state:
-    st.session_state.seed = 42839
+    st.session_state.seed = 45739
 
 # --- MAIN INTERFACE ---
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### [ INPUT ]")
-    input_text = st.text_area("In", height=300, label_visibility="collapsed", key="input_key", placeholder="Enter data sequence...")
+    input_text = st.text_area("In", height=250, label_visibility="collapsed", key="input_key", placeholder="Awaiting sequence...")
     
-    # Control Row: Run, Seed, Random
-    c1, c2, c3 = st.columns([2, 1, 1])
+    # Control Row: Process | Seed | Dice Icon
+    c1, c2, c3 = st.columns([3, 2, 1])
     with c1:
         execute = st.button("◈ RUN PROCESS ◈")
     with c2:
@@ -105,7 +110,8 @@ with col1:
             current_seed = int(''.join(filter(str.isdigit, seed_val_str)) or 0)
         except: current_seed = 0
     with c3:
-        if st.button("RAND"):
+        # Hier ist jetzt das Würfel-Emoji statt "RAND"
+        if st.button("🎲"):
             st.session_state.seed = random.randint(10000, 99999)
             st.rerun()
 
@@ -116,14 +122,12 @@ with col2:
     st.text_area(
         "Out", 
         value=output_text, 
-        height=300, 
+        height=250, 
         label_visibility="collapsed", 
-        key="output_field",
-        help="Highlight and use Ctrl+C / Cmd+C to copy."
+        key="output_field"
     )
-    # Streamlit built-in copy helper
     if output_text:
-        st.info("Tip: Double tap text to select & copy on mobile.")
+        st.info("Tip: Double tap text to copy.")
 
 st.markdown("---")
-st.caption(f"NODE: OPERATIONAL | CORE_ID: {current_seed}")
+st.caption(f"CORE_STATUS: OPERATIONAL | ENTROPY_ID: {current_seed}")
