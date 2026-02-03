@@ -1,147 +1,107 @@
-import streamlit as st
+import tkinter as tk
 import random
 
-# --- CONFIG ---
-st.set_page_config(page_title="AQUASINE v20.5", layout="wide", page_icon="◈")
+class HexNodeV20_5:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AQUASINE v20.5 - GLITCH HEX")
+        self.root.geometry("1100x850")
+        self.root.configure(bg="#000000")
 
-# --- ADVANCED CYBER CSS ---
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400&display=swap');
-
-    .stApp { background-color: #000000; color: #00ffcc; font-family: 'JetBrains Mono', monospace; }
-    
-    /* Header & Tag */
-    .main-title { font-size: 1.8rem; letter-spacing: 5px; font-weight: 100; color: #00ffcc; margin-bottom: 0px; }
-    .vehm-tag { font-size: 0.7rem; color: #222; letter-spacing: 3px; margin-bottom: 30px; }
-
-    /* Input & Output Fields */
-    .stTextArea textarea { 
-        background-color: #050505 !important; 
-        color: #00ffcc !important; 
-        border: 1px solid #111 !important;
-        border-radius: 0px !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.9rem !important;
-    }
-    
-    /* Mobile Word-Wrap Fix & Pink Output */
-    div[data-testid="column"]:nth-child(2) textarea {
-        color: #ff0055 !important;
-        white-space: pre-wrap !important;
-        word-wrap: break-word !important;
-        border: 1px solid #1a000a !important;
-    }
-    
-    /* Minimalist Buttons */
-    .stButton>button { 
-        width: 100%; 
-        background-color: #000 !important; 
-        color: #00ffcc !important; 
-        border: 1px solid #111 !important;
-        border-radius: 0px !important;
-        height: 3.5rem;
-        letter-spacing: 4px;
-        transition: 0.3s;
-    }
-    .stButton>button:hover { border-color: #ff0055 !important; color: #ff0055 !important; background-color: #0a0005 !important; }
-
-    /* Seed Input Field */
-    .stTextInput input {
-        background-color: #000 !important;
-        color: #00ffcc !important;
-        border: 1px solid #111 !important;
-        text-align: center;
-        border-radius: 0px !important;
-        letter-spacing: 2px;
-    }
-
-    /* Seed Copy Box */
-    .stCodeBlock { background-color: #050505 !important; border: 1px solid #111 !important; border-radius: 0px !important; }
-    code { color: #00ffcc !important; }
-    
-    /* Hide Streamlit Branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- CORE LOGIC ---
-def glitch_process(content, seed_val):
-    if not content or content.strip() == "":
-        return "", "IDLE"
-    
-    GLYPH_BASE = 0x2200
-    RANGE_SIZE = 256
-    
-    # Analyze first non-whitespace char for mode detection
-    stripped = content.strip()
-    first_char = stripped[0]
-    is_decrypt = GLYPH_BASE <= ord(first_char) < (GLYPH_BASE + RANGE_SIZE + 500)
-    
-    res = ""
-    for i, char in enumerate(content):
-        if char in (" ", "\n"):
-            res += char
-            continue
-        char_rng = random.Random(seed_val + i)
-        shift = char_rng.randint(1, 1000)
-        if not is_decrypt:
-            new_code = GLYPH_BASE + (ord(char) + shift) % RANGE_SIZE
-            res += chr(new_code)
-        else:
-            glyph_code = ord(char)
-            orig_code = (glyph_code - GLYPH_BASE - shift) % RANGE_SIZE
-            res += chr(orig_code % 256)
-    return res, "DECRYPT" if is_decrypt else "ENCRYPT"
-
-# --- UI STRUCTURE ---
-st.markdown('<p class="main-title">◈ AQUASINE v20.5</p>', unsafe_allow_html=True)
-st.markdown('<p class="vehm-tag">VEHMKATER_CORE_LINKED</p>', unsafe_allow_html=True)
-
-if 'seed' not in st.session_state:
-    st.session_state.seed = 45739
-
-# --- LAYOUT ---
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("### 01_DATA_IN")
-    input_text = st.text_area("In", height=200, label_visibility="collapsed", key="in_field", placeholder="---")
-    
-    st.markdown("### 02_ENTROPY")
-    # Manual Seed Input
-    seed_input_raw = st.text_input("S", value=str(st.session_state.seed), label_visibility="collapsed")
-    
-    # Filter only digits
-    seed_digits = ''.join(filter(str.isdigit, seed_input_raw))
-    current_seed = int(seed_digits) if seed_digits else 0
-    st.session_state.seed = current_seed
-
-    # Display for copying
-    st.code(f"{current_seed}", language=None)
-
-    # Action Buttons
-    if st.button("RANDOMIZE"):
-        st.session_state.seed = random.randint(10000, 99999)
-        st.rerun()
+        # ANDROID-STABLE CORE
+        self.glyph_base = 0x2200  
+        self.range_size = 256 
         
-    execute_trigger = st.button("EXECUTE")
+        self.setup_ui()
+        self.generate_new_seed()
 
-# Calculation (always runs, but button can be used for force-refresh)
-output_text, mode = glitch_process(input_text, current_seed)
+    def setup_ui(self):
+        self.sidebar = tk.Frame(self.root, bg="#030303", width=220)
+        self.sidebar.pack(side="left", fill="y")
+        
+        tk.Label(self.sidebar, text="⎋ GLITCH_HEX", bg="#030303", fg="#00ffcc", font=("Courier", 16, "bold")).pack(pady=40)
+        
+        # Seed
+        tk.Label(self.sidebar, text="[ ⧖ ENTROPY_SEED ]", bg="#030303", fg="#444", font=("Courier", 9)).pack()
+        self.seed_entry = tk.Entry(self.sidebar, bg="#0a0a0a", fg="#ff0055", font=("Courier", 12), bd=0, justify="center")
+        self.seed_entry.pack(pady=10, padx=20, fill="x")
+        self.seed_entry.bind("<KeyRelease>", lambda e: self.process())
 
-with col2:
-    st.markdown(f"### 03_DATA_OUT [{mode}]")
-    # THE FIX: We use a key that doesn't conflict and ensure the value is explicitly passed
-    st.text_area(
-        "Out", 
-        value=output_text, 
-        height=380, 
-        label_visibility="collapsed", 
-        key="out_field"
-    )
+        btn_style = {"bg": "#0a0a0a", "fg": "#00ffcc", "font": ("Courier", 10, "bold"), "bd": 0, "cursor": "hand2", "activebackground": "#111"}
+        tk.Button(self.sidebar, text="[ ϟ RE-SEED ]", command=self.generate_new_seed, **btn_style).pack(pady=15, padx=25, fill="x")
+        tk.Button(self.sidebar, text="[ 📋 COPY ]", command=self.copy_output, **btn_style).pack(pady=15, padx=25, fill="x")
 
-st.markdown("---")
-st.caption(f"NODE_STATUS: ONLINE | STABILITY: 100% | CORE: {current_seed}")
+        self.status_label = tk.Label(self.sidebar, text="◈ NODE_IDLE", bg="#030303", fg="#222", font=("Courier", 8))
+        self.status_label.pack(side="bottom", pady=20)
+
+        # Content Zone
+        self.main_frame = tk.Frame(self.root, bg="#000000")
+        self.main_frame.pack(side="right", fill="both", expand=True)
+
+        self.input_text = tk.Text(self.main_frame, bg="#000000", fg="#00ffcc", insertbackground="#00ffcc", font=("Courier New", 13), bd=0, padx=45, pady=30, undo=True)
+        self.input_text.pack(fill="both", expand=True)
+        self.input_text.bind("<KeyRelease>", self.auto_process)
+
+        tk.Frame(self.main_frame, height=1, bg="#111").pack(fill="x")
+
+        self.output_text = tk.Text(self.main_frame, bg="#000000", fg="#ff0055", font=("Courier New", 13), bd=0, padx=45, pady=30)
+        self.output_text.pack(fill="both", expand=True)
+
+    def generate_new_seed(self):
+        self.seed_entry.delete(0, tk.END)
+        self.seed_entry.insert(0, str(random.randint(10000, 99999)))
+        self.process()
+
+    def copy_output(self):
+        self.root.clipboard_clear()
+        self.root.clipboard_append(self.output_text.get("1.0", "end-1c"))
+        self.status_label.config(text="◈ COPIED", fg="#ff9100")
+
+    def auto_process(self, event):
+        if event.keysym not in ("Left", "Right", "Up", "Down"):
+            self.process()
+
+    def process(self):
+        content = self.input_text.get("1.0", "end-1c")
+        if not content:
+            self.output_text.delete("1.0", "end")
+            return
+
+        seed_str = ''.join(filter(str.isdigit, self.seed_entry.get()))
+        seed_val = int(seed_str) if seed_str else 0
+        
+        # Verbesserter Check: Wir schauen, ob das erste Zeichen im Ziel-Block liegt
+        try:
+            first_char_val = ord(content[0])
+            is_decrypt = (self.glyph_base <= first_char_val < self.glyph_base + self.range_size)
+        except:
+            is_decrypt = False
+        
+        self.status_label.config(text="◈ EXTR_MODE" if is_decrypt else "◈ INJECT_MODE", fg="#00ffcc" if is_decrypt else "#ff0055")
+
+        res = ""
+        for i, char in enumerate(content):
+            if char in (" ", "\n"):
+                res += char
+                continue
+            
+            char_rng = random.Random(seed_val + i)
+            shift = char_rng.randint(1, 1000)
+
+            if not is_decrypt:
+                # In den Android-Block projizieren
+                new_code = self.glyph_base + (ord(char) + shift) % self.range_size
+                res += chr(new_code)
+            else:
+                # Zurück zum Ursprung
+                glyph_code = ord(char)
+                orig_code = (glyph_code - self.glyph_base - shift) % self.range_size
+                res += chr(orig_code % 256)
+
+        self.output_text.delete("1.0", "end")
+        self.output_text.insert("1.0", res)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = HexNodeV20_5(root)
+    root.mainloop()
