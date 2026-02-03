@@ -37,16 +37,6 @@ Using a seed-based mapping system, AQUASINE transforms strings into unreadable s
 **Output:** `⊐Ⅵ⥀҈⣨⊐⧑ⳙ⣨Ⅵ̢⸹_⋊̢̿ⳙ҈̴ⳙⅥ͒͠⥀⥀͡͠_ᚦ⫩⌖⣚`
 
 ---
-## 🚀 GETTING STARTED
-
-1.  **Requirement:** Python 3.x must be installed.
-2.  **Save File:** Save the source code as `AQUASINE_v19.3_OVERLOAD.py`.
-3.  **Run:** Simply **double-click** the file or run via terminal:
-    ```bash
-    python AQUASINE_v19.3_OVERLOAD.py
-    ```
-
----
 
 ## 🖥️ INTERFACE & OUTPUT PREVIEW
 
@@ -60,7 +50,17 @@ Using a seed-based mapping system, AQUASINE transforms strings into unreadable s
 
 ---
 
+## 🚀 GETTING STARTED
+
+1.  **Requirement:** Python 3.x must be installed.
+2.  **Save File:** Save the source code as `AQUASINE_v19.3_OVERLOAD.py`.
+3.  **Run:** Simply **double-click** the file or run via terminal:
+    ```bash
+    python AQUASINE_v19.3_OVERLOAD.py
+    ```
+
 ---
+
 
 ## 💀 PHILOSOPHY
 > "In an age of total surveillance, silence is a luxury—but **noise** is a weapon."
